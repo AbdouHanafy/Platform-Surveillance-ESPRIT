@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="demo_user_stage" />
+        <module name="config-server" />
+        <module name="microserviceUser" />
+        <module name="microserviceGestionDesFraude" />
+        <module name="microserviceGestionDesSalles" />
+        <module name="eureka" />
+        <module name="microserviceGestionDesNotifications" />
+        <module name="configserver" />
+        <module name="microserviceEmploiDuTemps" />
+        <module name="gateway" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="microserviceSurveillanceDesExamens" target="17" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="config-server" options="-parameters" />
+      <module name="configserver" options="-parameters" />
+      <module name="demo_user_stage" options="-parameters" />
+      <module name="eureka" options="-parameters" />
+      <module name="gateway" options="-parameters" />
+      <module name="microserviceEmploiDuTemps" options="-parameters" />
+      <module name="microserviceGestionDesFraude" options="-parameters" />
+      <module name="microserviceGestionDesNotifications" options="-parameters" />
+      <module name="microserviceGestionDesSalles" options="-parameters" />
+      <module name="microserviceSurveillanceDesExamens" options="-parameters" />
+      <module name="microserviceUser" options="-parameters" />
+    </option>
+  </component>
+</project>
