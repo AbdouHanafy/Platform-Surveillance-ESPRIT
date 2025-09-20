@@ -1,0 +1,107 @@
+<div class="affectation-container">
+  <h2>👨‍🏫 Affectation Automatique des Enseignants</h2>
+
+  <!-- Simple One-Click Assignment Section -->
+  <div class="auto-assignment-section">
+    <button 
+      type="button" 
+      class="btn-auto-assign" 
+      (click)="assignAllEnseignantsRandomly()"
+      [disabled]="isAssigning">
+      <i class="pi pi-users"></i>
+      {{ isAssigning ? 'Affectation en cours...' : 'Affecter TOUS les Enseignants Automatiquement' }}
+    </button>
+  </div>
+
+  <hr />
+
+  <h3>📋 Liste des Modules avec Affectation d'Enseignants</h3>
+  <table class="table" aria-label="Liste des affectations d'enseignants">
+    <thead>
+      <tr>
+        <th>Module</th>
+        <th>Groupe</th>
+        <th>Période</th>
+        <th>Date/Horaire</th>
+        <th>Salle</th>
+        <th>Enseignant Affecté</th>
+        <th>Statut</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let affectation of affectations">
+        <td>{{ affectation.module.libelleModule }}</td>
+        <td>
+          {{ getDisplayClassName(affectation.groupe) }}
+          <br />
+          <small>
+            Effectif: {{ affectation.groupe.effectif }} |
+            Département: {{ affectation.groupe.departement }}
+          </small>
+        </td>
+        <td>{{ affectation.periode }}</td>
+        <td>
+          {{ affectation.date | date: 'dd/MM/yyyy' }}
+          <br />
+          <small>{{ affectation.heureDebut }} - {{ affectation.heureFin }}</small>
+        </td>
+        <td>
+          <div *ngIf="affectation.salleAffectee" class="assigned-info">
+            <i class="pi pi-home text-success"></i>
+            {{ affectation.salleNom }}
+            <small>({{ affectation.salleCapacite }} places)</small>
+          </div>
+          <div *ngIf="!affectation.salleAffectee" class="unassigned-info">
+            <i class="pi pi-home text-muted"></i>
+            Salle requise
+          </div>
+        </td>
+        <td>
+          <div *ngIf="affectation.enseignantAffecte" class="assigned-info">
+            <i class="pi pi-check-circle text-success"></i>
+            {{ affectation.enseignantNom }}
+            <small>{{ affectation.enseignantGrade }}</small>
+          </div>
+          <div *ngIf="!affectation.enseignantAffecte" class="unassigned-info">
+            <i class="pi pi-times-circle text-warning"></i>
+            Non affecté
+          </div>
+        </td>
+        <td>
+          <span class="status-badge" [ngClass]="getStatusClass(affectation.statut)">
+            {{ getStatusLabel(affectation.statut) }}
+          </span>
+        </td>
+        <td>
+          <button 
+            *ngIf="!affectation.enseignantAffecte"
+            (click)="assignEnseignantToModule(affectation)" 
+            class="btn-assign-individual"
+            [disabled]="isAssigning"
+            aria-label="Affecter un enseignant à ce module">
+            👨‍🏫 Affecter Enseignant
+          </button>
+          <button 
+            *ngIf="affectation.enseignantAffecte"
+            (click)="removeEnseignantFromModule(affectation.id)" 
+            class="btn-remove"
+            aria-label="Retirer l'enseignant">
+            ❌ Retirer
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Statistics Section -->
+  <div class="stats-section">
+    <div class="stat-card">
+      <h4>📊 Statistiques</h4>
+      <p><strong>Total modules:</strong> {{ affectations.length }}</p>
+      <p><strong>Enseignants affectés:</strong> {{ getEnseignantsAssignedCount() }}</p>
+      <p><strong>En attente:</strong> {{ getUnassignedEnseignantsCount() }}</p>
+      <p><strong>Taux d'affectation:</strong> {{ getEnseignantAssignmentRate() }}%</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,138 @@
+<div class="dashboard">
+  <div class="grid kpis">
+    <div class="card kpi">
+      <div class="kpi-label">Utilisateurs</div>
+      <div class="kpi-value">{{ totalUsers }}</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">Enseignants</div>
+      <div class="kpi-value">{{ totalTeachers }}</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">Examens</div>
+      <div class="kpi-value">{{ totalExams }}</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">Salles</div>
+      <div class="kpi-value">{{ totalSalles }}</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">Classes</div>
+      <div class="kpi-value">{{ totalClasses }}</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">Fraudes en attente</div>
+      <div class="kpi-value">{{ pendingFraudes }}</div>
+    </div>
+  </div>
+
+  <div class="grid two-cols">
+    <div class="card list">
+      <div class="card-title">Derniers utilisateurs</div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Matricule</th>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Rôle</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of latestUsers">
+            <td>{{ u.matricule }}</td>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.role }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card list">
+      <div class="card-title">Derniers besoins d'examen</div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Période</th>
+            <th>Module</th>
+            <th>Classes</th>
+            <th>Salles</th>
+            <th>Enseignants</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of latestExams">
+            <td>{{ e.periode }}</td>
+            <td>{{ e.moduleLibelle }}</td>
+            <td>{{ e.nombreClasses }}</td>
+            <td>{{ e.nombreSalles }}</td>
+            <td>{{ e.nombreEnseignants }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid two-cols">
+    <div class="card">
+      <div class="card-title">Examens par période</div>
+      <canvas #examsPeriodeChart height="160"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Répartition des rôles</div>
+      <canvas #usersRoleChart height="160"></canvas>
+    </div>
+  </div>
+
+  <div class="grid two-cols">
+    <div class="card">
+      <div class="card-title">Alertes récentes <span class="muted">({{ unreadCount }} non lues)</span></div>
+      <ul class="alerts">
+        <li *ngFor="let n of notifications">
+          <span class="type" [ngClass]="n.type">●</span>
+          <span class="msg">{{ n.message }}</span>
+          <span class="time">{{ n.timestamp | date:'short' }}</span>
+        </li>
+      </ul>
+      <button class="btn" (click)="markAllNotificationsRead()">Marquer tout comme lu</button>
+    </div>
+    <div class="card quick">
+      <div class="card-title">Actions rapides</div>
+             <div class="quick-grid">
+         <button class="btn" (click)="go('/register')">
+           <span class="btn-icon">👤</span>
+           Ajouter utilisateur
+         </button>
+         <button class="btn" (click)="go('/addenseignant')">
+           <span class="btn-icon">👨‍🏫</span>
+           Ajouter enseignant
+         </button>
+         <button class="btn" (click)="go('/groupe_manager')">
+           <span class="btn-icon">👥</span>
+           Gérer classes
+         </button>
+         <button class="btn" (click)="go('/module_manger')">
+           <span class="btn-icon">📚</span>
+           Gérer modules
+         </button>
+         <button class="btn" (click)="go('/GestionExamen')">
+           <span class="btn-icon">📅</span>
+           Planifier examen
+         </button>
+         <button class="btn" (click)="go('/examanchreno')">
+           <span class="btn-icon">⏰</span>
+           Chronogramme
+         </button>
+         <button class="btn" (click)="go('/salles')">
+           <span class="btn-icon">🏢</span>
+           Gérer salles
+         </button>
+         <button class="btn" (click)="go('/fraudes')">
+           <span class="btn-icon">⚠️</span>
+           Déclarer fraude
+         </button>
+       </div>
+    </div>
+  </div>
+</div>

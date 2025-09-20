@@ -1,0 +1,142 @@
+<div class="affectation-container">
+  <h2>📚 Affectation des Modules (Vue Complète)</h2>
+
+  <!-- Combined Assignment Section -->
+  <div class="auto-assignment-section">
+    <button 
+      type="button" 
+      class="btn-auto-assign-salles" 
+      (click)="assignAllSallesRandomly()"
+      [disabled]="isAssigning">
+      <i class="pi pi-home"></i>
+      Affecter TOUTES les Salles
+    </button>
+    
+    <button 
+      type="button" 
+      class="btn-auto-assign-enseignants" 
+      (click)="assignAllEnseignantsRandomly()"
+      [disabled]="isAssigning">
+      <i class="pi pi-users"></i>
+      Affecter TOUS les Enseignants
+    </button>
+
+    <button 
+      type="button" 
+      class="btn-reset-all" 
+      (click)="resetAllAssignments()"
+      [disabled]="isAssigning">
+      <i class="pi pi-refresh"></i>
+      Tout Réinitialiser
+    </button>
+  </div>
+
+  <hr />
+
+  <h3>📋 Vue Complète des Affectations de Modules</h3>
+  <table class="table" aria-label="Liste complète des affectations">
+    <thead>
+      <tr>
+        <th>Module</th>
+        <th>Groupe</th>
+        <th>Période</th>
+        <th>Date/Horaire</th>
+        <th>Salle</th>
+        <th>Enseignant</th>
+        <th>Statut Global</th>
+        <th>Progression</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let affectation of affectations" [ngClass]="getRowClass(affectation.statut)">
+        <td>
+          <strong>{{ affectation.module.libelleModule }}</strong>
+        </td>
+        <td>
+          {{ getDisplayClassName(affectation.groupe) }}
+          <br />
+          <small>
+            Effectif: {{ affectation.groupe.effectif }} |
+            Département: {{ affectation.groupe.departement }}
+          </small>
+        </td>
+        <td>
+          <span class="periode-badge">{{ affectation.periode }}</span>
+        </td>
+        <td>
+          {{ affectation.date | date: 'dd/MM/yyyy' }}
+          <br />
+          <small>{{ affectation.heureDebut }} - {{ affectation.heureFin }}</small>
+        </td>
+        <td>
+          <div *ngIf="affectation.salleAffectee" class="assigned-info">
+            <i class="pi pi-check-circle text-success"></i>
+            {{ affectation.salleNom }}
+            <br />
+            <small>({{ affectation.salleCapacite }} places)</small>
+          </div>
+          <div *ngIf="!affectation.salleAffectee" class="unassigned-info">
+            <i class="pi pi-times-circle text-warning"></i>
+            Non affectée
+          </div>
+        </td>
+        <td>
+          <div *ngIf="affectation.enseignantAffecte" class="assigned-info">
+            <i class="pi pi-check-circle text-success"></i>
+            {{ affectation.enseignantNom }}
+            <br />
+            <small>{{ affectation.enseignantGrade }}</small>
+          </div>
+          <div *ngIf="!affectation.enseignantAffecte" class="unassigned-info">
+            <i class="pi pi-times-circle text-warning"></i>
+            Non affecté
+          </div>
+        </td>
+        <td>
+          <span class="status-badge" [ngClass]="getStatusClass(affectation.statut)">
+            {{ getStatusLabel(affectation.statut) }}
+          </span>
+        </td>
+        <td>
+          <div class="progress-indicator">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="getProgressPercentage(affectation)"></div>
+            </div>
+            <small>{{ getProgressText(affectation) }}</small>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Global Statistics Section -->
+  <div class="stats-section">
+    <div class="stat-card">
+      <h4>📊 Statistiques Globales</h4>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <span class="stat-number">{{ affectations.length }}</span>
+          <span class="stat-label">Total Modules</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ getSallesAssignedCount() }}</span>
+          <span class="stat-label">Salles Affectées</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ getEnseignantsAssignedCount() }}</span>
+          <span class="stat-label">Enseignants Affectés</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ getFullyAssignedCount() }}</span>
+          <span class="stat-label">Complet</span>
+        </div>
+      </div>
+      <div class="global-progress">
+        <h5>Progression Globale: {{ getGlobalProgressRate() }}%</h5>
+        <div class="global-progress-bar">
+          <div class="global-progress-fill" [style.width.%]="getGlobalProgressRate()"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

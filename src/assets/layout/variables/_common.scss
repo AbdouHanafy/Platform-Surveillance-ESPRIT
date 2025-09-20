@@ -1,0 +1,40 @@
+:root {
+    /* Core brand palette */
+    --brand-red: #dc2626; /* red-600 */
+    --brand-red-dark: #b91c1c; /* red-700 */
+    --brand-green: #16a34a; /* green-600 */
+    --brand-green-dark: #15803d; /* green-700 */
+    --brand-white: #ffffff;
+    --brand-black: #0b0b0b;
+
+    /* Map to Prime tokens */
+    --p-primary-color: var(--brand-red);
+    --p-primary-contrast-color: var(--brand-white);
+    --p-text-color: var(--brand-black);
+    --p-text-muted-color: #6b7280; /* neutral gray for secondary text */
+    --p-content-border-color: #e5e7eb;
+    --p-content-background: var(--brand-white);
+    --p-content-hover-background: #fee2e2; /* light red hover */
+    --p-overlay-popover-background: var(--brand-white);
+    --p-focus-ring-color: color-mix(in srgb, var(--brand-red) 35%, transparent);
+
+    /* Local aliases expected by layout */
+    --primary-color: var(--p-primary-color);
+    --primary-contrast-color: var(--p-primary-contrast-color);
+    --text-color: var(--p-text-color);
+    --text-color-secondary: var(--p-text-muted-color);
+    --surface-border: var(--p-content-border-color);
+    --surface-card: var(--p-content-background);
+    --surface-hover: var(--p-content-hover-background);
+    --surface-overlay: var(--p-overlay-popover-background);
+    --transition-duration: var(--p-transition-duration);
+    --maskbg: var(--p-mask-background);
+    --content-border-radius: var(--p-content-border-radius);
+    --layout-section-transition-duration: 0.2s;
+    --element-transition-duration: var(--p-transition-duration);
+    --focus-ring-width: var(--p-focus-ring-width);
+    --focus-ring-style: var(--p-focus-ring-style);
+    --focus-ring-color: var(--p-focus-ring-color);
+    --focus-ring-offset: var(--p-focus-ring-offset);
+    --focus-ring-shadow: var(--p-focus-ring-shadow);
+}

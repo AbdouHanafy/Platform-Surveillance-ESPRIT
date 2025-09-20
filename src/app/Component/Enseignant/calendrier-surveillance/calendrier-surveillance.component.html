@@ -1,0 +1,31 @@
+<div class="table-wrapper">
+  <h2 class="table-title">Liste des enseignants</h2>
+
+  <div class="table-responsive">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Matricule</th>
+          <th>Nom</th>
+        
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let enseignant of enseignants">
+          <td>{{ enseignant.matricule }}</td>
+          <td>{{ enseignant.nom }}</td>
+          
+          <td>
+            <button class="btn-action"*ngIf="enseignant.id !== undefined" (click)="ajouterEmploi(enseignant.id)">
+              + Emploi du surveillance
+            </button>
+            
+          </td>
+         
+          
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

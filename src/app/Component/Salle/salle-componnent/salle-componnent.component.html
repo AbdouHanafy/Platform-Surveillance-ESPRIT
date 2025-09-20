@@ -1,0 +1,168 @@
+<div class="container">
+  <h2 class="section-title">
+    <span class="vertical-bar"></span>
+    Liste des Salles
+  </h2>
+
+  <button class="btn btn-primary mb-3" (click)="openModal()">Ajouter Salle</button>
+
+  <table class="styled-table" *ngIf="salles.length > 0">
+    <thead>
+      <tr>
+        <th>Nom complet</th>
+        <th>Nom</th>
+        <th>Capacité</th>
+        <th>Bloc</th>
+        <th>Étage</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let salle of salles">
+        <td>{{ salle.bloc }}{{ salle.etage }}{{ salle.nom }}</td>
+        <td>{{ salle.nom }}</td>
+        <td>{{ salle.capacite }}</td>
+        <td>{{ salle.bloc }}</td>
+        <td>{{ salle.etage }}</td>
+        <td>
+          <button class="btn btn-primary" (click)="openReservationModal(salle)">Réserver</button>
+          <button class="btn btn-info ms-2" (click)="openDisponibilitesModal(salle)">Voir disponibilités</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Modal Ajout Salle -->
+  <div class="modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()"></div>
+  <div class="modal" *ngIf="isModalOpen" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-header">
+      <h3 id="modalTitle">Ajouter une Salle</h3>
+      <button class="close-btn" (click)="closeModal()" aria-label="Fermer">&times;</button>
+    </div>
+    <form [formGroup]="salleForm" (ngSubmit)="onSubmit()" class="modal-body" novalidate>
+      <div class="form-group">
+        <label for="bloc">Bloc</label>
+        <select id="bloc" class="form-control" formControlName="bloc">
+          <option value="" disabled>-- Choisir un bloc --</option>
+          <option *ngFor="let bloc of blocsEsprit" [value]="bloc">Bloc {{ bloc }}</option>
+        </select>
+        <div class="text-danger" *ngIf="salleForm.get('bloc')?.invalid && salleForm.get('bloc')?.touched">
+          Le bloc est requis.
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="etage">Étage</label>
+        <select id="etage" class="form-control" formControlName="etage">
+          <option value="" disabled>-- Choisir un étage --</option>
+          <option *ngFor="let etage of [1, 2, 3, 4]" [value]="etage">Étage {{ etage }}</option>
+        </select>
+        <div class="text-danger" *ngIf="salleForm.get('etage')?.invalid && salleForm.get('etage')?.touched">
+          Étage requis.
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="nom">Nom de la salle</label>
+        <select id="nom" class="form-control" formControlName="nom">
+          <option *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]" [value]="i < 10 ? '0' + i : i.toString()">
+            {{ i < 10 ? '0' + i : i }}
+          </option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Capacité</label>
+        <input type="number" formControlName="capacite" class="form-control" min="1" />
+        <div class="text-danger" *ngIf="salleForm.get('capacite')?.invalid && salleForm.get('capacite')?.touched">
+          Capacité requise (≥ 1)
+        </div>
+      </div>
+      <button type="submit" [disabled]="salleForm.invalid" class="btn btn-primary mt-3 w-100">Enregistrer</button>
+    </form>
+  </div>
+
+  <!-- Modal Réservation Salle -->
+  <div class="modal-backdrop" *ngIf="isReservationModalOpen" (click)="closeReservationModal()"></div>
+  <div class="modal" *ngIf="isReservationModalOpen" role="dialog" aria-modal="true" aria-labelledby="modalReservationTitle">
+    <div class="modal-header">
+      <h3 id="modalReservationTitle">Réserver la salle : {{ selectedSalle?.bloc }}{{ selectedSalle?.etage }}{{ selectedSalle?.nom }}</h3>
+      <button class="close-btn" (click)="closeReservationModal()" aria-label="Fermer">&times;</button>
+    </div>
+    <form [formGroup]="reservationForm" (ngSubmit)="onSubmitReservation()" class="modal-body" novalidate>
+      <div class="form-group">
+        <label>Date Examen</label>
+        <input type="date" formControlName="dateExamen" class="form-control" />
+        <div class="text-danger" *ngIf="reservationForm.get('dateExamen')?.invalid && reservationForm.get('dateExamen')?.touched">
+          La date est requise.
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Heure Début</label>
+        <input type="time" formControlName="heureDebut" class="form-control" />
+        <div class="text-danger" *ngIf="reservationForm.get('heureDebut')?.invalid && reservationForm.get('heureDebut')?.touched">
+          Heure début requise.
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Heure Fin</label>
+        <input type="time" formControlName="heureFin" class="form-control" />
+        <div class="text-danger" *ngIf="reservationForm.get('heureFin')?.invalid && reservationForm.get('heureFin')?.touched">
+          Heure fin requise.
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="matricule">Enseignant</label>
+        <select id="matricule" formControlName="matricule" class="form-control">
+          <option value="">-- Sélectionner un enseignant --</option>
+          <option *ngFor="let ens of enseignants" [value]="ens.matricule">
+            {{ ens.nom }} {{ ens.prenom }} ({{ ens.matricule }})
+          </option>
+        </select>
+        <div class="text-danger" *ngIf="reservationForm.get('matricule')?.invalid && reservationForm.get('matricule')?.touched">
+          L'enseignant est requis.
+        </div>
+      </div>
+      <button type="submit" [disabled]="reservationForm.invalid || isSubmittingReservation" class="btn btn-primary mt-3 w-100">
+        Confirmer la réservation
+      </button>
+      <div *ngIf="reservationErrorMessage" class="text-danger mt-2">{{ reservationErrorMessage }}</div>
+    </form>
+  </div>
+
+  <!-- Modal Disponibilités -->
+  <div class="modal-backdrop" *ngIf="isDisponibilitesModalOpen" (click)="closeDisponibilitesModal()"></div>
+  <div class="modal" *ngIf="isDisponibilitesModalOpen" role="dialog" aria-modal="true" aria-labelledby="modalDisponibilitesTitle" style="max-width: 600px;">
+    <div class="modal-header">
+      <h3 id="modalDisponibilitesTitle">Disponibilités pour la salle : {{ selectedSalle?.bloc }}{{ selectedSalle?.etage }}{{ selectedSalle?.nom }}</h3>
+      <button class="close-btn" (click)="closeDisponibilitesModal()" aria-label="Fermer">&times;</button>
+    </div>
+    <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+      <table class="table table-striped" *ngIf="disponibilites && disponibilites.length > 0; else noDisponibilites">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Créneau Horaire</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let dispo of disponibilites">
+            <td>{{ dispo.date | date:'yyyy-MM-dd' }}</td>
+
+            <td>{{ dispo.heureDebut }} - {{ dispo.heureFin }}</td>
+            <td class="text-danger">Occupé</td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noDisponibilites>
+        <p>Aucune disponibilité trouvée pour cette salle.</p>
+      </ng-template>
+    </div>
+  </div>
+
+
+  <input type="file" accept=".xlsx,.xls" (change)="onFileSelected($event)" />
+
+<button class="btn btn-success" [disabled]="!selectedFile" (click)="uploadFile()">
+  Importer Salles depuis Excel
+</button>
+
+</div>

@@ -1,0 +1,80 @@
+<div class="session-container">
+  <div class="header">
+    <h2>📅 Gestion des Sessions</h2>
+    <button class="btn-add" (click)="openAddForm()">
+      <i class="plus-icon">+</i> Ajouter Session
+    </button>
+  </div>
+
+  <!-- Modal Form -->
+  <div class="modal-overlay" *ngIf="showForm" (click)="closeForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ editing ? '✏️ Modifier la Session' : '➕ Ajouter Nouvelle Session' }}</h3>
+        <button class="close-btn" (click)="closeForm()">&times;</button>
+      </div>
+      
+      <form (ngSubmit)="saveSession()" #form="ngForm" class="session-form">
+        <div class="form-group">
+          <label for="sessionName">Nom de la Session</label>
+          <input
+            id="sessionName"
+            type="text"
+            name="nom"
+            [(ngModel)]="sessionModel.nom_session"
+            placeholder="Ex: Session Automne 2024"
+            required
+            class="session-input" />
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-save" [disabled]="!form.valid">
+            {{ editing ? '💾 Mettre à jour' : '✅ Enregistrer' }}
+          </button>
+          <button type="button" class="btn-cancel" (click)="closeForm()">
+            ❌ Annuler
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Sessions Grid -->
+  <div class="sessions-grid">
+    <div class="grid-header">
+      <h3>📋 Liste des Sessions ({{ sessions.length }})</h3>
+    </div>
+
+    <div class="sessions-container" *ngIf="sessions.length > 0">
+      <div 
+        *ngFor="let session of sessions; trackBy: trackBySessionId" 
+        class="session-card">
+        <div class="session-info">
+          <div class="session-icon">📅</div>
+          <div class="session-details">
+            <h4 class="session-name">{{ session.nom_session }}</h4>
+            <p class="session-id">ID: {{ session.id }}</p>
+          </div>
+        </div>
+        <div class="session-actions">
+          <button class="btn-edit" (click)="editSession(session)" title="Modifier">
+            ✏️ Modifier
+          </button>
+          <button class="btn-delete" (click)="deleteSession(session.id)" title="Supprimer">
+            🗑️ Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="sessions.length === 0">
+      <div class="empty-icon">📭</div>
+      <h3>Aucune session disponible</h3>
+      <p>Commencez par créer votre première session</p>
+      <button class="btn-create-first" (click)="openAddForm()">
+        ✨ Créer la première session
+      </button>
+    </div>
+  </div>
+</div>

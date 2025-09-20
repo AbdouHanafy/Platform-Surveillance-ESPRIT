@@ -1,0 +1,111 @@
+<div class="auth-section">
+  <h2>Ajouter un emploi du temps</h2>
+
+  <div class="form-group">
+    <label for="enseignantSelect">Sélectionner un enseignant :</label>
+    <select id="enseignantSelect" class="form-control" (change)="onEnseignantSelected($event)">
+      <option value="">-- Choisir un enseignant --</option>
+      <option *ngFor="let e of enseignants" [value]="e.id">{{ e.nom }} {{ e.prenom }} ({{ e.matricule }})</option>
+    </select>
+  </div>
+
+  <div *ngIf="selectedEnseignant" class="enseignant-info">
+    <p><strong>Nom :</strong> {{ selectedEnseignant.nom }} {{ selectedEnseignant.prenom }}</p>
+    <p><strong>Matricule :</strong> {{ selectedEnseignant.matricule }}</p>
+  </div>
+
+  <form [formGroup]="emploiForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label>Date :</label>
+      <input type="date" formControlName="date" class="form-control" />
+      <div *ngIf="emploiForm.get('date')?.invalid && emploiForm.get('date')?.touched" class="error-msg">
+        Date requise
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Heure début :</label>
+      <input type="time" formControlName="heureDebut" class="form-control" />
+      <div *ngIf="emploiForm.get('heureDebut')?.invalid && emploiForm.get('heureDebut')?.touched" class="error-msg">
+        Heure de début requise
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Heure fin :</label>
+      <input type="time" formControlName="heureFin" class="form-control" />
+      <div *ngIf="emploiForm.get('heureFin')?.invalid && emploiForm.get('heureFin')?.touched" class="error-msg">
+        Heure de fin requise
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Type d'activité :</label>
+      <select formControlName="typeActivite" class="form-control">
+        <option value="">-- Sélectionner un type --</option>
+        <option *ngFor="let type of typeActivites" [value]="type">{{ type }}</option>
+      </select>
+      <div *ngIf="emploiForm.get('typeActivite')?.invalid && emploiForm.get('typeActivite')?.touched" class="error-msg">
+        Type d’activité requis
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Salle :</label>
+      <select formControlName="salle" class="form-control">
+        <option value="">-- Sélectionner une salle --</option>
+        <option *ngFor="let salle of salles" [value]="salle.nom">{{ salle.nom }}</option>
+      </select>
+      <div *ngIf="emploiForm.get('salle')?.invalid && emploiForm.get('salle')?.touched" class="error-msg">
+        Salle requise
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Groupe :</label>
+      <select formControlName="groupeId" class="form-control">
+        <option value="">-- Sélectionner un groupe --</option>
+        <option *ngFor="let groupe of groupes" [value]="groupe.id">{{ groupe.nomClasse }}</option>
+      </select>
+      <div *ngIf="emploiForm.get('groupeId')?.invalid && emploiForm.get('groupeId')?.touched" class="error-msg">
+        Groupe requis
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" [disabled]="emploiForm.invalid || !selectedEnseignant">
+      Ajouter l'emploi du temps
+    </button>
+  </form>
+
+  <div *ngIf="successMessage" class="alert alert-success mt-3">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
+
+  <!-- Affichage des réservations pour la salle et date choisies -->
+  <div *ngIf="(reservationsSalle?.length || 0) > 0" class="mt-4">
+    <h4>Réservations pour la salle {{ emploiForm.get('salle')?.value }} à la date {{ emploiForm.get('date')?.value }} :</h4>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Heure début</th>
+          <th>Heure fin</th>
+          <th>Statut</th>
+          <th>Enseignant</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let res of reservationsSalle">
+          <td>{{ res.heureDebut }}</td>
+          <td>{{ res.heureFin }}</td>
+          <td [ngClass]="{'text-danger': res.statut === 'Occupé', 'text-success': res.statut === 'Libre'}">
+            {{ res.statut }}
+          </td>
+          <td>{{ getEnseignantName(res.enseignantId) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="reservationsSalle?.length === 0 && emploiForm.get('date')?.value && emploiForm.get('salle')?.value" class="mt-4">
+    <p>Aucune réservation trouvée pour cette salle à cette date.</p>
+  </div>
+</div>

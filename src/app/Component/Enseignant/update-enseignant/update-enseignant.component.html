@@ -1,0 +1,119 @@
+<div class="update-enseignant-container">
+  <h2>Modifier un Enseignant</h2>
+
+  <form #updateForm="ngForm" (ngSubmit)="onSubmit(updateForm)" aria-label="Formulaire de mise à jour de l'enseignant">
+
+    <!-- Nom -->
+    <div class="form-group">
+      <label for="nom">Nom <span class="required">*</span></label>
+      <input
+        type="text"
+        id="nom"
+        name="nom"
+        [(ngModel)]="enseignant.nom"
+        required
+        class="form-control"
+        aria-required="true"
+        aria-label="Nom de l'enseignant"
+      />
+    </div>
+
+  
+    <!-- Email -->
+    <div class="form-group">
+      <label for="email">Email <span class="required">*</span></label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        [(ngModel)]="enseignant.email"
+        required
+        class="form-control"
+        aria-required="true"
+        aria-label="Email de l'enseignant"
+      />
+    </div>
+
+    <!-- Téléphone -->
+    <div class="form-group">
+      <label for="telephone">Téléphone <span class="required">*</span></label>
+      <input
+        type="text"
+        id="telephone"
+        name="telephone"
+        [(ngModel)]="enseignant.telephone"
+        required
+        class="form-control"
+        aria-required="true"
+        aria-label="Téléphone de l'enseignant"
+      />
+    </div>
+
+    <!-- Matricule -->
+    <div class="form-group">
+      <label for="matricule">Matricule <span class="required">*</span></label>
+      <input
+        type="text"
+        id="matricule"
+        name="matricule"
+        [(ngModel)]="enseignant.matricule"
+        required
+        (input)="onMatriculeInput(enseignant.matricule)"
+        class="form-control"
+        aria-required="true"
+        aria-label="Matricule de l'enseignant"
+      />
+      <div *ngIf="matriculeInvalide" class="text-danger">
+        Matricule invalide.
+      </div>
+    </div>
+
+    <!-- Grade -->
+    <div class="form-group">
+      <label for="grade">Grade <span class="required">*</span></label>
+      <select
+        id="grade"
+        name="grade"
+        [(ngModel)]="enseignant.grade"
+        required
+        class="form-control"
+        aria-required="true"
+        aria-label="Grade de l'enseignant"
+      >
+        <option [ngValue]="null" disabled>-- Sélectionner un grade --</option>
+        <option *ngFor="let grade of gradeOptions" [value]="grade">{{ grade }}</option>
+      </select>
+    </div>
+
+   <!-- Unité Pédagogique -->
+<div class="form-group">
+  <label for="unitePedagogique">Unité Pédagogique <span class="required">*</span></label>
+ <select
+  id="unitePedagogique"
+  name="unitePedagogique"
+  [(ngModel)]="selectedUnitePedagogiqueId"
+  (change)="onUniteChange($event)"
+  required
+  class="form-control"
+  aria-required="true"
+  aria-label="Unité Pédagogique de l'enseignant"
+>
+  <option [value]="0" disabled>-- Sélectionner une unité --</option>
+  <option *ngFor="let up of unitePedagogiques" [value]="up?.id ?? 0">
+    {{ up?.libelle ?? '—' }}
+  </option>
+</select>
+
+</div>
+
+    <!-- Bouton de soumission -->
+    <button
+      type="submit"
+      class="btn btn-primary"
+      [disabled]="updateForm.invalid || matriculeInvalide"
+      aria-label="Mettre à jour l'enseignant"
+    >
+      Mettre à jour
+    </button>
+  </form>
+</div>

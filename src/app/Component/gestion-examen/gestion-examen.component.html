@@ -1,0 +1,671 @@
+<div class="exam-management-container">
+  <!-- Loading Overlay -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Chargement des données...</p>
+    </div>
+  </div>
+
+  <!-- Processing Overlay -->
+  <div *ngIf="isProcessing" class="processing-overlay">
+    <div class="processing-spinner">
+      <div class="spinner"></div>
+      <p>Traitement en cours...</p>
+    </div>
+  </div>
+
+  <!-- Notification -->
+  <div *ngIf="notification.show" 
+       class="notification" 
+       [ngClass]="'notification-' + notification.type">
+    <div class="notification-content">
+      <span class="notification-icon">
+        <ng-container [ngSwitch]="notification.type">
+          <span *ngSwitchCase="'success'">✅</span>
+          <span *ngSwitchCase="'error'">❌</span>
+          <span *ngSwitchDefault>ℹ️</span>
+        </ng-container>
+      </span>
+      <span class="notification-message">{{ notification.message }}</span>
+      <button class="notification-close" (click)="hideNotification()">✕</button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <span class="title-icon">📝</span>
+        Gestion des Examens
+      </h1>
+      <div class="header-actions">
+        <button 
+          *ngIf="currentView !== 'form'" 
+          type="button" 
+          class="btn btn-primary btn-add-exam"
+          (click)="showAddForm()"
+          [disabled]="isProcessing">
+          <span class="btn-content">
+            <span class="btn-icon">➕</span>
+            <span class="btn-text">Ajouter un Examen</span>
+          </span>
+        </button>
+        <div class="header-stats" *ngIf="examensCalcules.length > 0">
+          <div class="stat-chip">
+            <span class="stat-value">{{ examensCalcules.length }}</span>
+            <span class="stat-label">Examens</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Breadcrumb Navigation -->
+  <nav class="breadcrumb-nav" *ngIf="!isLoading">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" 
+          [class.active]="currentView === 'periodes'">
+        <button 
+          type="button"
+          class="breadcrumb-link"
+          (click)="goBackToPeriodes()"
+          [disabled]="currentView === 'periodes'">
+          <span class="breadcrumb-icon">🏠</span>
+          Périodes
+        </button>
+      </li>
+      
+      <li *ngIf="selectedPeriode && currentView !== 'form'" 
+          class="breadcrumb-item"
+          [class.active]="currentView === 'modules'">
+        <span class="breadcrumb-separator">›</span>
+        <button 
+          type="button"
+          class="breadcrumb-link"
+          (click)="goBackToModules()"
+          [disabled]="currentView === 'modules'">
+          <span class="breadcrumb-icon">📚</span>
+          {{ selectedPeriode }}
+        </button>
+      </li>
+      
+      <li *ngIf="selectedModule" 
+          class="breadcrumb-item active">
+        <span class="breadcrumb-separator">›</span>
+        <span class="breadcrumb-text">
+          <span class="breadcrumb-icon">📋</span>
+          {{ selectedModule }}
+        </span>
+      </li>
+
+      <li *ngIf="currentView === 'form'" 
+          class="breadcrumb-item active">
+        <span class="breadcrumb-separator">›</span>
+        <span class="breadcrumb-text">
+          <span class="breadcrumb-icon">📝</span>
+          Formulaire d'ajout
+        </span>
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content" *ngIf="!isLoading">
+    
+    <!-- Add Exam Form -->
+    <section *ngIf="currentView === 'form'" class="content-section form-section">
+      <div class="section-header">
+        <div class="section-title-group">
+          <h2 class="section-title">
+            <span class="section-icon">📝</span>
+            Ajouter un Nouvel Examen
+          </h2>
+          <p class="section-description">
+            Remplissez les informations nécessaires pour planifier un examen
+          </p>
+        </div>
+        <button 
+          type="button" 
+          class="btn btn-secondary btn-close-form"
+          (click)="hideForm()"
+          [disabled]="isProcessing">
+          <span class="btn-content">
+            <span class="btn-icon">✕</span>
+            <span class="btn-text">Fermer</span>
+          </span>
+        </button>
+      </div>
+      
+      <div class="form-container">
+        <form [formGroup]="examenForm" (ngSubmit)="onSubmitForm()" class="exam-form">
+          <div class="form-grid">
+            <!-- Période -->
+            <div class="form-group">
+              <label for="periode" class="form-label">
+                <span class="label-icon">📅</span>
+                Période <span class="required">*</span>
+              </label>
+              <select 
+                id="periode" 
+                formControlName="periode" 
+                class="form-control"
+                (change)="onPeriodeChange()">
+                <option value="">Sélectionnez une période</option>
+                <option *ngFor="let periode of PERIODES" [value]="periode">
+                  {{ periode.replace('_', ' ') }}
+                </option>
+              </select>
+              <div class="form-error" *ngIf="examenForm.get('periode')?.invalid && examenForm.get('periode')?.touched">
+                La période est requise
+              </div>
+            </div>
+
+            <!-- Module -->
+            <div class="form-group">
+              <label for="moduleLibelle" class="form-label">
+                <span class="label-icon">📚</span>
+                Module <span class="required">*</span>
+              </label>
+              <select 
+                id="moduleLibelle" 
+                formControlName="moduleLibelle" 
+                class="form-control"
+                (change)="onModuleChange()"
+                [disabled]="!examenForm.get('periode')?.value">
+                <option value="">Sélectionnez un module</option>
+                <option *ngFor="let module of availableModules" [value]="module">
+                  {{ module }}
+                </option>
+              </select>
+              <div class="form-error" *ngIf="examenForm.get('moduleLibelle')?.invalid && examenForm.get('moduleLibelle')?.touched">
+                Le module est requis
+              </div>
+            </div>
+
+            <!-- Nombre de Classes (affichage) -->
+            <div class="form-group">
+              <label for="nombreGroupes" class="form-label">
+                <span class="label-icon">👥</span>
+                Nombre de Classes <span class="required">*</span>
+              </label>
+              <input 
+                type="number" 
+                id="nombreGroupes" 
+                formControlName="nombreGroupes" 
+                class="form-control"
+                min="1"
+                placeholder="Ex: 5">
+              <div class="form-error" *ngIf="examenForm.get('nombreGroupes')?.invalid && examenForm.get('nombreGroupes')?.touched">
+                Un nombre de classes valide est requis (minimum 1)
+              </div>
+            </div>
+
+            <!-- Nombre de Classes -->
+            <div class="form-group">
+              <label for="nombreClasses" class="form-label">
+                <span class="label-icon">🏫</span>
+                Nombre de Classes <span class="required">*</span>
+              </label>
+              <input 
+                type="number" 
+                id="nombreClasses" 
+                formControlName="nombreClasses" 
+                class="form-control"
+                min="1"
+                placeholder="Auto-calculé"
+                readonly>
+              <div class="form-help">
+                Calculé automatiquement: {{ CLASSES_PER_GROUP }} groupes par classe
+              </div>
+            </div>
+
+            <!-- Nombre de Salles -->
+            <div class="form-group">
+              <label for="nombreSalles" class="form-label">
+                <span class="label-icon">🏛️</span>
+                Nombre de Salles <span class="required">*</span>
+              </label>
+              <input 
+                type="number" 
+                id="nombreSalles" 
+                formControlName="nombreSalles" 
+                class="form-control"
+                min="1"
+                placeholder="Ex: 10">
+              <div class="form-error" *ngIf="examenForm.get('nombreSalles')?.invalid && examenForm.get('nombreSalles')?.touched">
+                Un nombre de salles valide est requis (minimum 1)
+              </div>
+            </div>
+
+            <!-- Nombre d'Enseignants -->
+            <div class="form-group">
+              <label for="nombreEnseignants" class="form-label">
+                <span class="label-icon">👨‍🏫</span>
+                Nombre d'Enseignants <span class="required">*</span>
+              </label>
+              <input 
+                type="number" 
+                id="nombreEnseignants" 
+                formControlName="nombreEnseignants" 
+                class="form-control"
+                min="1"
+                placeholder="Auto-calculé">
+              <div class="form-help">
+                Calculé automatiquement: {{ TEACHERS_MULTIPLIER }} enseignants par classe
+              </div>
+              <div class="form-error" *ngIf="examenForm.get('nombreEnseignants')?.invalid && examenForm.get('nombreEnseignants')?.touched">
+                Un nombre d'enseignants valide est requis (minimum 1)
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button 
+              type="button" 
+              class="btn btn-secondary btn-cancel"
+              (click)="hideForm()"
+              [disabled]="isProcessing">
+              <span class="btn-content">
+                <span class="btn-icon">❌</span>
+                <span class="btn-text">Annuler</span>
+              </span>
+            </button>
+            
+            <button 
+              type="submit" 
+              class="btn btn-primary btn-submit"
+              [disabled]="examenForm.invalid || isProcessing">
+              <span class="btn-content">
+                <span class="btn-icon">💾</span>
+                <span class="btn-text">Enregistrer l'Examen</span>
+              </span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Form Preview -->
+        <div class="form-preview" *ngIf="examenForm.get('periode')?.value && examenForm.get('moduleLibelle')?.value">
+          <h3 class="preview-title">
+            <span class="preview-icon">👁️</span>
+            Aperçu de l'Examen
+          </h3>
+          <div class="preview-content">
+            <div class="preview-item">
+              <span class="preview-label">Période:</span>
+              <span class="preview-value">{{ examenForm.get('periode')?.value?.replace('_', ' ') }}</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Module:</span>
+              <span class="preview-value">{{ examenForm.get('moduleLibelle')?.value }}</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Classes:</span>
+              <span class="preview-value">{{ examenForm.get('nombreGroupes')?.value }}</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Classes:</span>
+              <span class="preview-value">{{ examenForm.get('nombreClasses')?.value }}</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Salles nécessaires:</span>
+              <span class="preview-value">{{ examenForm.get('nombreSalles')?.value }}</span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">Enseignants nécessaires:</span>
+              <span class="preview-value">{{ examenForm.get('nombreEnseignants')?.value }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Périodes Grid View -->
+    <section *ngIf="currentView === 'periodes'" class="content-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="section-icon">📆</span>
+          Sélectionnez une période d'examen
+        </h2>
+        <p class="section-description">
+          Choisissez la période pour laquelle vous souhaitez gérer les examens
+        </p>
+      </div>
+      
+      <div class="grid-container">
+        <div class="periods-grid">
+          <article 
+            *ngFor="let p of periodesData; trackBy: trackByPeriode" 
+            class="period-card"
+            (click)="onPeriodeClick(p.periode)"
+            [attr.aria-label]="'Période ' + p.periode">
+            
+            <div class="card-header">
+              <h3 class="card-title">{{ p.periode.replace('_', ' ') }}</h3>
+              <div class="card-status" *ngIf="p.examensCount > 0">
+                <span class="status-badge status-active">{{ p.examensCount }} examens</span>
+              </div>
+            </div>
+            
+            <div class="card-content">
+              <div class="stats-grid">
+                <div class="stat-item">
+                  <span class="stat-number">{{ p.modulesCount }}</span>
+                  <span class="stat-label">Modules disponibles</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">{{ p.examensCount }}</span>
+                  <span class="stat-label">Examens planifiés</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card-footer">
+              <div class="card-action">
+                <span class="action-text">Cliquer pour voir les modules</span>
+                <span class="action-icon">→</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modules Grid View -->
+    <section *ngIf="currentView === 'modules'" class="content-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="section-icon">📚</span>
+          Modules pour {{ selectedPeriode.replace('_', ' ') }}
+        </h2>
+        <p class="section-description">
+          Gérez les examens pour chaque module de cette période
+        </p>
+      </div>
+      
+      <div class="grid-container">
+        <div class="modules-grid">
+          <article 
+            *ngFor="let m of modulesData; trackBy: trackByModule" 
+            class="module-card"
+            [class.card-added]="isModuleAdded(m.module)"
+            (click)="onModuleClick(m.module)"
+            [attr.aria-label]="'Module ' + m.module">
+            
+            <div class="card-header">
+              <h3 class="card-title">{{ m.module }}</h3>
+              <div class="card-status">
+                <span 
+                  *ngIf="isModuleAdded(m.module)" 
+                  class="status-badge status-success">
+                  ✓ Ajouté
+                </span>
+                <span 
+                  *ngIf="!isModuleAdded(m.module)" 
+                  class="status-badge status-pending">
+                  En attente
+                </span>
+              </div>
+            </div>
+            
+            <div class="card-content">
+              <div class="stats-grid">
+                <div class="stat-item">
+                  <span class="stat-number">{{ m.groupes }}</span>
+                  <span class="stat-label">Classes</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">{{ m.classes }}</span>
+                  <span class="stat-label">Classes</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">{{ m.salles }}</span>
+                  <span class="stat-label">Salles</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">{{ m.enseignants }}</span>
+                  <span class="stat-label">Enseignants</span>
+                </div>
+              </div>
+
+              <!-- Display group names with concatenated format -->
+              <div class="groups-preview" *ngIf="m.groupeNames.length > 0">
+                <h4 class="groups-preview-title">Classes ({{ m.groupeNames.length }}):</h4>
+                <div class="groups-tags">
+                  <span 
+                    *ngFor="let groupe of m.groupeNames.slice(0, 3)" 
+                    class="group-tag">
+                    {{ groupe }}
+                  </span>
+                  <span 
+                    *ngIf="m.groupeNames.length > 3" 
+                    class="group-tag more-tag">
+                    +{{ m.groupeNames.length - 3 }} autres
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card-footer">
+              <div class="card-action">
+                <span class="action-text">Voir les détails</span>
+                <span class="action-icon">→</span>
+              </div>
+              
+              <button 
+                type="button"
+                class="btn btn-primary btn-add"
+                [class.btn-success]="isModuleAdded(m.module)"
+                [disabled]="isModuleAdded(m.module) || isProcessing"
+                (click)="$event.stopPropagation(); ajouterModule(m.module)"
+                [attr.aria-label]="isModuleAdded(m.module) ? 'Module déjà ajouté' : 'Ajouter le module'">
+                
+                <span *ngIf="!isModuleAdded(m.module)" class="btn-content">
+                  <span class="btn-icon">➕</span>
+                  <span class="btn-text">Ajouter</span>
+                </span>
+                
+                <span *ngIf="isModuleAdded(m.module)" class="btn-content">
+                  <span class="btn-icon">✓</span>
+                  <span class="btn-text">Ajouté</span>
+                </span>
+              </button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Module Details View -->
+    <section *ngIf="currentView === 'details' && moduleDetails" class="content-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="section-icon">📋</span>
+          {{ moduleDetails.module }}
+        </h2>
+        <p class="section-description">
+          Détails complets pour {{ selectedPeriode.replace('_', ' ') }}
+        </p>
+      </div>
+      
+      <!-- Summary Stats -->
+      <div class="summary-container">
+        <div class="summary-card">
+          <h3 class="summary-title">📊 Résumé des besoins</h3>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <span class="summary-label">Groupes</span>
+              <span class="summary-value">{{ moduleDetails.groupes }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Classes</span>
+              <span class="summary-value">{{ moduleDetails.classes }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Salles</span>
+              <span class="summary-value">{{ moduleDetails.salles }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Enseignants</span>
+              <span class="summary-value">{{ moduleDetails.enseignants }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Groups Details with concatenated names -->
+      <div class="groups-section">
+        <h3 class="groups-title">
+          <span class="groups-icon">👥</span>
+          Liste des Classes ({{ moduleDetails.groupeNames.length }} classes, {{ moduleDetails.classNames.length }} sous-classes)
+        </h3>
+        
+        <div class="groups-grid">
+          <div 
+            *ngFor="let groupe of moduleDetails.groupeNames; let i = index; trackBy: trackByGroup" 
+            class="group-card">
+            
+            <div class="group-header">
+              <h4 class="group-name">{{ groupe }}</h4>
+              <span class="group-number">#{{ i + 1 }}</span>
+            </div>
+            
+            <div class="group-content">
+              <div class="classes-list">
+                <h5 class="classes-title">Classes :</h5>
+                <div class="class-tags">
+                  <span class="class-tag">{{ groupe }}-A</span>
+                  <span class="class-tag">{{ groupe }}-B</span>
+                </div>
+              </div>
+              
+              <div class="group-stats">
+                <div class="group-stat">
+                  <span class="stat-label">Classes</span>
+                  <span class="stat-value">{{ CLASSES_PER_GROUP }}</span>
+                </div>
+                <div class="group-stat">
+                  <span class="stat-label">Salles</span>
+                  <span class="stat-value">{{ CLASSES_PER_GROUP }}</span>
+                </div>
+                <div class="group-stat">
+                  <span class="stat-label">Enseignants</span>
+                  <span class="stat-value">{{ calculateEnseignants(CLASSES_PER_GROUP) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <div class="actions-section">
+        <button 
+          type="button"
+          class="btn btn-primary btn-large"
+          [class.btn-success]="isModuleAdded(moduleDetails.module)"
+          [disabled]="isModuleAdded(moduleDetails.module) || isProcessing"
+          (click)="ajouterModule(moduleDetails.module)">
+          
+          <span *ngIf="!isModuleAdded(moduleDetails.module)" class="btn-content">
+            <span class="btn-icon">➕</span>
+            <span class="btn-text">Ajouter ce module aux examens</span>
+          </span>
+          
+          <span *ngIf="isModuleAdded(moduleDetails.module)" class="btn-content">
+            <span class="btn-icon">✓</span>
+            <span class="btn-text">Module déjà ajouté</span>
+          </span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Existing Examens Table -->
+  <section *ngIf="examensCalcules.length > 0 && !isLoading" class="examens-section">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="section-icon">📋</span>
+        Examens Planifiés
+      </h2>
+      <div class="section-stats">
+        <span class="stats-badge">{{ examensCalcules.length }} examens</span>
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <div class="table-wrapper">
+        <table class="examens-table">
+          <thead>
+            <tr>
+              <th scope="col">Période</th>
+              <th scope="col">Module</th>
+              <th scope="col">Classes</th>
+              <th scope="col">Groupes</th>
+              <th scope="col">Besoins Salles</th>
+              <th scope="col">Besoins Enseignants</th>
+              <th scope="col" class="actions-column">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let e of examensCalcules; trackBy: trackByExamen" class="table-row">
+              <td>
+                <span class="periode-badge">{{ e.periode?.replace('_', ' ') }}</span>
+              </td>
+              <td>
+                <span class="module-name">{{ e.module }}</span>
+              </td>
+              <td>
+                <span class="stat-value">{{ e.groupes }}</span>
+              </td>
+              <td>
+                <span class="stat-value">{{ e.classes }}</span>
+              </td>
+              <td>
+                <span class="stat-value">{{ e.salles }}</span>
+              </td>
+              <td>
+                <span class="stat-value">{{ e.enseignants }}</span>
+              </td>
+              <td class="actions-cell">
+                <button 
+                  type="button"
+                  class="btn btn-danger btn-small"
+                  [disabled]="isProcessing"
+                  (click)="supprimerModule(e.module, e.periode || '')"
+                  [attr.aria-label]="'Supprimer ' + e.module"
+                  title="Supprimer cet examen">
+                  <span class="btn-icon">🗑️</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Empty State -->
+  <section *ngIf="examensCalcules.length === 0 && !isLoading" class="empty-state">
+    <div class="empty-content">
+      <div class="empty-icon">📝</div>
+      <h3 class="empty-title">Aucun examen planifié</h3>
+      <p class="empty-description">
+        Commencez par sélectionner une période puis ajoutez des modules pour planifier vos examens.
+      </p>
+      <button 
+        type="button" 
+        class="btn btn-primary"
+        (click)="goBackToPeriodes()"
+        *ngIf="currentView !== 'periodes'">
+        <span class="btn-content">
+          <span class="btn-icon">🏠</span>
+          <span class="btn-text">Retour aux périodes</span>
+        </span>
+      </button>
+    </div>
+  </section>
+</div>
+
+

@@ -1,0 +1,67 @@
+<div class="table-wrapper">
+  <h2 class="table-title">📚 Liste des Enseignants</h2>
+
+  <!-- Bouton Ajouter uniquement pour SUPER_ADMIN -->
+  <div *ngIf="canAdd()" class="mb-3">
+   
+  </div>
+
+  <!-- Loading state -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Chargement des enseignants...</p>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!loading && enseignants.length === 0">
+    <div class="empty-icon">👨‍🏫</div>
+    <h3>Aucun enseignant trouvé</h3>
+    <p>Commencez par ajouter votre premier enseignant.</p>
+    <button *ngIf="canAdd()" class="btn btn-primary" (click)="navigateToAddEnseignant()">
+      Ajouter un enseignant
+    </button>
+  </div>
+
+  <!-- Table content -->
+  <div class="table-responsive" *ngIf="!loading && enseignants.length > 0">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>👤 Nom</th>
+          <th>📧 Email</th>
+          <th>📞 Téléphone</th>
+          <th>🏢 Unité pédagogique</th>
+          <th>🎓 Grade</th>
+          <th>🆔 Matricule</th>
+          <!-- Actions uniquement pour SUPER_ADMIN et ADMIN -->
+          <th *ngIf="role !== 'ENSEIGNANT'">⚙️ Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let ens of enseignants">
+          <td data-label="Nom">{{ ens.nom }}</td>
+          <td data-label="Email">{{ ens.email }}</td>
+          <td data-label="Téléphone">{{ ens.telephone }}</td>
+          <td data-label="Unité pédagogique">{{ getLibelleUnitePedagogique(ens.unitePedagogique?.id) }}</td>
+          <td data-label="Grade">{{ getGradeIcon(ens.grade) }} {{ getGradeLibelle(ens.grade) }}</td>
+          <td data-label="Matricule">{{ ens.matricule }}</td>
+          <!-- Actions -->
+          <td *ngIf="role !== 'ENSEIGNANT'">
+            <div class="action-buttons">
+              <!-- Modifier pour SUPER_ADMIN et ADMIN -->
+              <button *ngIf="canEdit()" class="btn btn-secondary" 
+                      (click)="navigateToUpdateEnseignant(ens.id)">
+                Modifier
+              </button>
+              <!-- Supprimer uniquement pour SUPER_ADMIN -->
+              <button *ngIf="canDelete()" class="btn btn-danger" 
+                      (click)="deleteEnseignant(ens.id)">
+                Supprimer
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

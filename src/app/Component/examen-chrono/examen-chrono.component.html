@@ -1,0 +1,253 @@
+
+
+    
+<div class="examen-chrono-container">
+
+  <!-- Global notifications are now handled by the topbar -->
+
+
+  <!-- Header -->
+  <div class="header">
+    <h2>Gestion des Examens</h2>
+    <div class="header-buttons">
+      <button class="btn-add" (click)="toggleForm()" [disabled]="isLoading">
+        <i class="fas fa-plus"></i>
+        {{ showForm ? 'Annuler' : 'Nouvel Examen' }}
+      </button>
+      <button class="btn-test" (click)="testNotification()" style="margin-left: 10px; background-color: #28a745;">
+        <i class="fas fa-bell"></i>
+        Test Notification
+      </button>
+      <button class="btn-test" (click)="testWebSocketConnection()" style="margin-left: 10px; background-color: #007bff;">
+        <i class="fas fa-wifi"></i>
+        Test WebSocket
+      </button>
+      <button class="btn-test" (click)="testExamCreationNotification()" style="margin-left: 10px; background-color: #ffc107;">
+        <i class="fas fa-graduation-cap"></i>
+        Test Exam Creation
+      </button>
+      <button class="btn-test" (click)="testBackendNotifications()" style="margin-left: 10px; background-color: #dc3545;">
+        <i class="fas fa-server"></i>
+        Test Backend
+      </button>
+      <button class="btn-test" (click)="debugExamensState()" style="margin-left: 10px; background-color: #6f42c1;">
+        <i class="fas fa-bug"></i>
+        Debug Salles
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Chargement...</p>
+  </div>
+
+  <!-- Formulaire création examen -->
+  <div *ngIf="showForm" class="form-container">
+    <form [formGroup]="examenForm" (ngSubmit)="onSubmit()" class="exam-form">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="periode">Période</label>
+          <select id="periode" formControlName="periode" class="form-control">
+            <option value="" disabled>Sélectionnez une période</option>
+            <option *ngFor="let periode of periodes" [value]="periode">
+              {{ periode }}
+            </option>
+          </select>
+          <div *ngIf="examenForm.get('periode')?.touched && examenForm.get('periode')?.invalid" class="error-msg">
+            La période est obligatoire.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="module">Module</label>
+          <select id="module" formControlName="moduleId" class="form-control" [disabled]="!modules.length">
+            <option value="" disabled>Sélectionnez un module</option>
+            <option *ngFor="let module of modules" [value]="module.id">
+              {{ module.libelleModule }}
+            </option>
+          </select>
+          <div *ngIf="examenForm.get('moduleId')?.touched && examenForm.get('moduleId')?.invalid" class="error-msg">
+            Le module est obligatoire.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="dateExamen">Date d'examen</label>
+          <input
+            type="date"
+            id="dateExamen"
+            formControlName="dateExamen"
+            class="form-control"
+            [min]="weekDates[0]"
+            [max]="weekDates[6]"
+          />
+          <div *ngIf="examenForm.get('dateExamen')?.touched && examenForm.get('dateExamen')?.invalid" class="error-msg">
+            La date est obligatoire.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="seance">Séance</label>
+          <select id="seance" formControlName="seance" class="form-control">
+            <option value="" disabled>Sélectionnez une séance</option>
+            <option *ngFor="let seance of seances" [value]="seance">
+              {{ seance }}
+            </option>
+          </select>
+          <div *ngIf="examenForm.get('seance')?.touched && examenForm.get('seance')?.invalid" class="error-msg">
+            La séance est obligatoire.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="session">Session</label>
+        <select id="session" formControlName="sessionId" class="form-control">
+          <option value="" disabled>Sélectionnez une session</option>
+          <option *ngFor="let session of sessions" [value]="session.id">
+            {{ session.nom_session }}
+          </option>
+        </select>
+        <div *ngIf="examenForm.get('sessionId')?.touched && examenForm.get('sessionId')?.invalid" class="error-msg">
+          La session est obligatoire.
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="toggleForm()" [disabled]="isLoading">Annuler</button>
+        <button type="submit" class="btn-submit" [disabled]="!examenForm.valid || isLoading">
+          <i class="fas fa-save"></i> Créer l'examen
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Calendrier -->
+  <div class="calendar-container" *ngIf="!isLoading">
+    <div class="calendar-header">
+      <button class="nav-btn" (click)="previousWeek()">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <h3 class="week-range">{{ getWeekRange() }}</h3>
+      <button class="nav-btn" (click)="nextWeek()">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+
+    <div class="calendar-grid">
+      <!-- Colonne des heures -->
+      <div class="time-column">
+        <div class="time-header">Heure</div>
+        <div *ngFor="let seance of seances" class="time-slot">{{ seance }}</div>
+      </div>
+
+      <!-- Colonnes jours -->
+      <div *ngFor="let date of weekDates; let i = index" class="day-column">
+        <div class="day-header" [class.today]="isToday(date)">
+          <div class="day-name">{{ weekDays[i] }}</div>
+          <div class="day-date">{{ date | date: 'dd/MM' }}</div>
+        </div>
+
+        <div *ngFor="let seance of seances" class="time-slot-cell">
+          <div
+            class="events-container"
+            [class.events-expanded]="isSlotExpanded(date, seance)"
+            [attr.data-slot-id]="date + '-' + seance"
+          >
+            <ng-container *ngIf="getEventsForDateAndSeanceWithVisibility(date, seance, maxVisibleEvents) as eventData">
+              <!-- Évènements visibles -->
+              <div
+                *ngFor="let event of eventData.visibleEvents"
+                class="exam-event"
+                [class]="sanitizeSeanceClass(event.seance) + ' ' + getPeriodClass(event.periode || 'PERIODE_1')"
+                [title]="getEventTooltip(event)"
+              >
+                <div class="event-title">{{ event.title }}</div>
+                <div class="event-details"><small>{{ event.groupe }}</small></div>
+                <div class="event-teachers"><small>{{ event.enseignants }}</small></div>
+               <div class="event-salles">
+  <span *ngFor="let salle of event.salles.split(',')">
+    <i class="icon-room"></i>
+    <span class="salle-name">{{ salle.trim() }}</span>
+  </span>
+</div>
+           
+              </div>
+
+                             <!-- Évènements cachés (apparait si étendu) -->
+               <div
+                 *ngFor="let event of eventData.hiddenEvents"
+                 class="exam-event hidden-event"
+                 [class]="sanitizeSeanceClass(event.seance) + ' ' + getPeriodClass(event.periode || 'PERIODE_1')"
+                 [style.display]="isSlotExpanded(date, seance) ? 'block' : 'none'"
+                 [title]="getEventTooltip(event)"
+               >
+                 <div class="event-title">{{ event.title }}</div>
+                 <div class="event-details"><small>{{ event.groupe }}</small></div>
+                 <div class="event-teachers"><small>{{ event.enseignants }}</small></div>
+                 <div class="event-salles">
+                   <span *ngFor="let salle of event.salles.split(',')">
+                     <i class="icon-room"></i>
+                     <span class="salle-name">{{ salle.trim() }}</span>
+                   </span>
+                 </div>
+               </div>
+
+              <!-- Indicateur + d'évènements -->
+              <div
+                *ngIf="hasHiddenEvents(date, seance)"
+                class="more-events-indicator"
+                (click)="toggleSlotExpansion(date, seance)"
+              >
+                <span *ngIf="!isSlotExpanded(date, seance)">
+                  <i class="fas fa-plus"></i>
+                  {{ getHiddenEventsCount(date, seance) }} autre{{ getHiddenEventsCount(date, seance) > 1 ? 's' : '' }}
+                </span>
+                <span *ngIf="isSlotExpanded(date, seance)">
+                  <i class="fas fa-minus"></i> Réduire
+                </span>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Légende -->
+  <div class="legend">
+    <h4>Légende des Périodes</h4>
+    <div class="legend-items">
+      <div class="legend-item" *ngFor="let p of periodes">
+        <span class="legend-color" [ngClass]="getPeriodClass(p)"></span>
+        <span>{{ p.replace('_', ' ') }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="statistics" *ngIf="!isLoading">
+    <div class="stats-card">
+      <h4>Statistiques de la semaine</h4>
+      <div class="stats-content">
+        <div class="stat-item">
+          <span class="stat-number">{{ examens.length }}</span>
+          <span class="stat-label">Examens planifiés</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ modules.length }}</span>
+          <span class="stat-label">Modules actifs</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ groupes.length }}</span>
+          <span class="stat-label">Groupes concernés</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,76 @@
+<div class="container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-info">
+      <h2>Gestion des utilisateurs</h2>
+      <div class="user-count">{{ users.length }} utilisateur(s) au total</div>
+    </div>
+    <button *ngIf="role === 'SUPER_ADMIN'" class="btn btn-primary" (click)="navigateToRegister()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14m-7-7h14"/>
+      </svg>
+      Ajouter un utilisateur
+    </button>
+  </div>
+
+  <div class="table-container">
+    <div *ngIf="isLoading" class="loading">
+      <div class="spinner"></div>
+    </div>
+
+    <div *ngIf="!isLoading && users.length === 0" class="empty-state">
+      <div class="empty-icon">👤</div>
+      <h3>Aucun utilisateur trouvé</h3>
+      <p>Commencez par ajouter votre premier utilisateur pour gérer votre équipe.</p>
+      <button *ngIf="role === 'SUPER_ADMIN'" class="btn btn-primary" (click)="navigateToRegister()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14m-7-7h14"/>
+        </svg>
+        Ajouter un utilisateur
+      </button>
+    </div>
+
+    <table *ngIf="!isLoading && users.length > 0" class="table">
+      <thead>
+        <tr>
+          <th>Matricule</th>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Rôle</th>
+          <th>Statut</th>
+          <th *ngIf="role === 'SUPER_ADMIN'">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of users; trackBy: trackByUserId">
+          <td><strong>{{ user.matricule }}</strong></td>
+          <td>
+            <div class="user-info">
+              <div class="user-avatar">{{ getInitials(user.username) }}</div>
+              <span class="username">{{ user.username }}</span>
+            </div>
+          </td>
+          <td><a class="email-link" [href]="'mailto:' + user.email">{{ user.email }}</a></td>
+          <td><span class="role-badge" [ngClass]="user.role.toLowerCase()">{{ user.role }}</span></td>
+          <td><span class="status-btn" [ngClass]="user.active ? 'active' : 'inactive'">{{ user.active ? 'Actif' : 'Inactif' }}</span></td>
+          <td>
+            <div class="action-buttons">
+              <!-- Actions visibles uniquement pour SUPER_ADMIN -->
+              <button *ngIf="role === 'SUPER_ADMIN'" class="btn btn-sm" [ngClass]="user.active ? 'btn-warning' : 'btn-success'" (click)="toggleUserActive(user)">
+                {{ user.active ? 'Désactiver' : 'Activer' }}
+              </button>
+
+              <button *ngIf="role === 'SUPER_ADMIN'" class="btn btn-sm btn-secondary" (click)="updateUser(user)">
+                Modifier
+              </button>
+
+              <button *ngIf="role === 'SUPER_ADMIN'" class="btn btn-sm btn-danger" (click)="onDeleteUser(user.id)">
+                Supprimer
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
