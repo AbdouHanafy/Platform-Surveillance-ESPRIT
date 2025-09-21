@@ -1,0 +1,40 @@
+<div class="calendar-container">
+
+  <div class="calendar-header">
+    Emploi du temps de l’enseignant
+  </div>
+
+  <div class="filter-section" style="margin-bottom: 1rem;">
+    <label for="dateFilter">Choisir une date :</label>
+    <input 
+      id="dateFilter" 
+      type="date" 
+      [value]="dateSelectionnee"
+      (change)="onChangeDateFilter($event)" />
+  </div>
+
+  <div class="calendar-grid">
+    <div class="time-column"></div>
+    <div class="day-header" *ngFor="let jour of jours">
+      {{ jour | date:'EEEE dd/MM' }}
+    </div>
+
+    <ng-container *ngFor="let heure of heures">
+      <div class="time-column selected">{{ heure }}</div>
+      <ng-container *ngFor="let day of [0,1,2,3,4,5,6]">
+        <div class="cell" [ngClass]="{ 'occupied': estOccupe(heure, day) }">
+          <div *ngIf="estOccupe(heure, day)" class="room-info">
+            <div class="room-label">Activité</div>
+            <div class="room-number">{{ getActivite(heure, day) }}</div>
+
+            <div class="room-label">Salle</div>
+            <div class="room-number">{{ getSalle(heure, day) }}</div>
+
+            <div class="room-label">Classe</div>
+            <div class="room-number">{{ getGroupe(heure, day) }}</div>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+  </div>
+</div>

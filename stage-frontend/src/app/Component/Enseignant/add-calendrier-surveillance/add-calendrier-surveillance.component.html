@@ -1,0 +1,106 @@
+<div class="container">
+  <div class="logo-section">
+    <div class="logo-text">esprit</div>
+    <div class="logo-subtext">Se former autrement</div>
+    <div class="logo-honors">HONORS UNITED UNIVERSITIES</div>
+  </div>
+
+  <div class="left-section">
+    <h1 class="app-title">GestionSurveillance</h1>
+    <p class="app-subtitle">ESPRIT</p>
+  </div>
+
+  <div class="right-section">
+    <div class="auth-section">
+      <h2 class="section-title">Ajouter une surveillance</h2>
+
+      <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
+      <div *ngIf="errorMessage" class="error-message show">{{ errorMessage }}</div>
+
+      <form [formGroup]="emploiForm" (ngSubmit)="onSubmit()">
+
+        <!-- Enseignant ID (readonly visuellement mais conservé pour l'envoi) -->
+        <div class="form-group">
+          <input
+            type="text"
+            class="form-control"
+            [value]="emploiForm.get('enseignantId')?.value"
+            disabled
+          />
+          <input type="hidden" formControlName="enseignantId" />
+        </div>
+
+        <!-- Date -->
+        <div class="form-group">
+          <input
+            type="date"
+            class="form-control"
+            formControlName="date"
+            placeholder="Date"
+          />
+          <div class="error" *ngIf="emploiForm.get('date')?.invalid && emploiForm.get('date')?.touched">
+            La date est requise.
+          </div>
+        </div>
+
+        <!-- Heure début -->
+        <div class="form-group">
+          <input
+            type="time"
+            class="form-control"
+            formControlName="heureDebut"
+            placeholder="Heure de début"
+          />
+          <div class="error" *ngIf="emploiForm.get('heureDebut')?.invalid && emploiForm.get('heureDebut')?.touched">
+            Heure de début requise.
+          </div>
+        </div>
+
+        <!-- Heure fin -->
+        <div class="form-group">
+          <input
+            type="time"
+            class="form-control"
+            formControlName="heureFin"
+            placeholder="Heure de fin"
+          />
+          <div class="error" *ngIf="emploiForm.get('heureFin')?.invalid && emploiForm.get('heureFin')?.touched">
+            Heure de fin requise.
+          </div>
+        </div>
+
+        <!-- Salle ID -->
+        <div class="form-group">
+          <input
+            type="number"
+            class="form-control"
+            formControlName="salleId"
+            placeholder="ID de la salle"
+          />
+          <div class="error" *ngIf="emploiForm.get('salleId')?.invalid && emploiForm.get('salleId')?.touched">
+            ID de la salle requis.
+          </div>
+        </div>
+
+        <!-- Semestre -->
+        <div class="form-group">
+          <select formControlName="semestre" class="select-control">
+            <option value="">Sélectionnez un semestre</option>
+            <option value="1">Semestre 1</option>
+            <option value="2">Semestre 2</option>
+          </select>
+          <div class="error" *ngIf="emploiForm.get('semestre')?.invalid && emploiForm.get('semestre')?.touched">
+            Semestre requis (1 ou 2).
+          </div>
+        </div>
+
+        <!-- Bouton de soumission -->
+        <button type="submit" class="btn btn-primary">Planifier</button>
+      </form>
+
+      <div class="toggle-section">
+        <a class="toggle-link" routerLink="/calendrier">⬅ Retour à la liste</a>
+      </div>
+    </div>
+  </div>
+</div>

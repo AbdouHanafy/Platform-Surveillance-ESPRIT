@@ -1,0 +1,148 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+}
+  .btn {
+    background-color: #2c3e50;
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn:hover {
+    background-color: #1a252f;
+  }
+
+.calendar-container {
+  max-width: 1000px;
+  margin: 20px auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.calendar-header {
+  background-color: #e8e8e8;
+  padding: 15px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: 80px repeat(7, 1fr);
+  border-collapse: collapse;
+}
+
+.time-column {
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+}
+
+.time-column.selected {
+  background-color: #fff;
+  border: 2px solid #f10d0d;
+}
+
+.day-header {
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.cell {
+  border: 1px solid #ddd;
+  min-height: 60px;
+  background-color: #fff;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cell.occupied {
+  background-color: #2c3e50;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.cell.occupied .room-info {
+  text-align: center;
+}
+
+.cell.occupied .room-label {
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.cell.occupied .room-number {
+  font-size: 16px;
+  font-weight: bold;
+}
+/* Section filtre */
+.filter-section {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.05);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333;
+  min-width: 150px;
+}
+
+.filter-group label {
+  margin-bottom: 0.3rem;
+}
+
+.filter-group select,
+.filter-group input[type="date"] {
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #bbb;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease;
+}
+
+.filter-group select:hover,
+.filter-group input[type="date"]:hover,
+.filter-group select:focus,
+.filter-group input[type="date"]:focus {
+  border-color: #ff0000;
+  outline: none;
+  box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+}

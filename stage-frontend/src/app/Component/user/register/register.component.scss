@@ -1,0 +1,558 @@
+// Modern Registration Form SCSS
+// Variables mapped to brand palette (red/gray/white/black)
+$primary-gradient: linear-gradient(135deg, var(--brand-red) 0%, #6b7280 100%); // red → gray-600
+$secondary-gradient: linear-gradient(90deg, var(--brand-red), #6b7280);
+$success-gradient: linear-gradient(135deg, #9ca3af, #6b7280); // gray-400 → gray-600
+$error-gradient: linear-gradient(135deg, var(--brand-red), var(--brand-red-dark));
+
+$primary-color: var(--brand-red);
+$secondary-color: #6b7280; // gray-600
+$text-dark: var(--text-color);
+$text-medium: var(--text-color-secondary);
+$text-light: var(--text-color-secondary);
+$border-color: var(--surface-border);
+$border-hover: color-mix(in srgb, var(--brand-red) 25%, var(--surface-border));
+$background-light: var(--surface-card);
+$white: var(--brand-white);
+$error-color: var(--brand-red);
+
+$border-radius-sm: 8px;
+$border-radius-md: 12px;
+$border-radius-lg: 16px;
+$border-radius-xl: 24px;
+
+$shadow-sm: 0 4px 12px color-mix(in srgb, var(--brand-red) 20%, transparent);
+$shadow-md: 0 8px 25px color-mix(in srgb, var(--brand-red) 25%, transparent);
+$shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.1);
+
+$transition-base: all 0.3s ease;
+$transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+// Base styles
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.registration-wrapper {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: $primary-gradient;
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Main container
+.registration-container {
+  background: color-mix(in srgb, var(--brand-white) 95%, transparent);
+  backdrop-filter: blur(20px);
+  border-radius: $border-radius-xl;
+  box-shadow: $shadow-lg;
+  padding: 40px;
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: $secondary-gradient;
+    background-size: 300% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+  }
+}
+
+@keyframes shimmer {
+  0%, 100% { 
+    background-position: 0% 0%; 
+  }
+  50% { 
+    background-position: 100% 0%; 
+  }
+}
+
+// Header styles
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+
+  h1 {
+    color: $text-dark;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    background: $primary-gradient;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  p {
+    color: $text-light;
+    font-size: 1.1rem;
+  }
+}
+
+// Toggle section
+.toggle-section {
+  display: flex;
+  background: var(--surface-hover);
+  border-radius: $border-radius-lg;
+  padding: 8px;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.toggle-option {
+  flex: 1;
+  position: relative;
+
+  input[type="radio"] {
+    display: none;
+
+    &:checked + .toggle-label {
+      color: $white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+.toggle-label {
+  display: block;
+  text-align: center;
+  padding: 16px 24px;
+  border-radius: $border-radius-md;
+  cursor: pointer;
+  transition: $transition-smooth;
+  color: $text-light;
+  font-weight: 600;
+  font-size: 1rem;
+  position: relative;
+  z-index: 2;
+}
+
+.toggle-slider {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: calc(50% - 8px);
+  height: calc(100% - 16px);
+  background: $primary-gradient;
+  border-radius: $border-radius-md;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: $shadow-sm;
+
+  &.teacher {
+    transform: translateX(100%);
+  }
+}
+
+// Form styles
+.form-section {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideInUp 0.5s ease-out forwards;
+}
+
+@keyframes slideInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+
+  &.full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+.form-label {
+  display: block;
+  color: $text-medium;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.form-input, 
+.form-select {
+  width: 100%;
+  padding: 16px 20px;
+  border: 2px solid $border-color;
+  border-radius: $border-radius-md;
+  font-size: 1rem;
+  transition: $transition-base;
+  background: $white;
+  font-family: inherit;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-red) 15%, transparent);
+    transform: translateY(-2px);
+  }
+
+  &:hover {
+    border-color: $border-hover;
+  }
+
+  &.ng-invalid.ng-touched {
+    border-color: $error-color;
+    box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+  }
+
+  &.ng-valid.ng-touched {
+    border-color: #6b7280; // gray-600
+    box-shadow: 0 0 0 3px color-mix(in srgb, #6b7280 15%, transparent);
+  }
+}
+
+.form-select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 16px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 50px;
+}
+
+// Submit button
+.submit-btn {
+  width: 100%;
+  background: $primary-gradient;
+  color: $white;
+  border: none;
+  padding: 18px 32px;
+  border-radius: $border-radius-md;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: $transition-base;
+  margin-top: 20px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    background: $border-hover;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+
+    &::before {
+      display: none;
+    }
+  }
+}
+
+// Grade options
+.grade-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.grade-option {
+  position: relative;
+
+  input[type="radio"] {
+    display: none;
+
+    &:checked + label {
+      border-color: $primary-color;
+      background: $primary-color;
+      color: $white;
+    }
+  }
+
+  label {
+    display: block;
+    padding: 12px 16px;
+    border: 2px solid $border-color;
+    border-radius: $border-radius-sm;
+    cursor: pointer;
+    transition: $transition-base;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    &:hover {
+      border-color: $primary-color;
+      background: rgba(102, 126, 234, 0.05);
+    }
+  }
+}
+
+// Floating elements
+.floating-elements {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.floating-element {
+  position: absolute;
+  background: color-mix(in srgb, var(--brand-red) 10%, transparent);
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+
+  &:nth-child(1) {
+    width: 60px;
+    height: 60px;
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+  }
+
+  &:nth-child(2) {
+    width: 40px;
+    height: 40px;
+    top: 60%;
+    right: 10%;
+    animation-delay: 2s;
+  }
+
+  &:nth-child(3) {
+    width: 80px;
+    height: 80px;
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 4s;
+  }
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0) rotate(0deg); 
+    opacity: 0.3; 
+  }
+  50% { 
+    transform: translateY(-20px) rotate(180deg); 
+    opacity: 0.1; 
+  }
+}
+
+// Messages
+.success-message {
+  background: $success-gradient;
+  color: $white;
+  padding: 16px 20px;
+  border-radius: $border-radius-md;
+  margin-bottom: 24px;
+  font-weight: 500;
+  text-align: center;
+  transform: scale(0.95);
+  animation: successPop 0.3s ease-out forwards;
+}
+
+@keyframes successPop {
+  to {
+    transform: scale(1);
+  }
+}
+
+.error-message {
+  background: $error-gradient;
+  color: $white;
+  padding: 16px 20px;
+  border-radius: $border-radius-md;
+  margin-bottom: 24px;
+  font-weight: 500;
+  text-align: center;
+}
+
+// Form helpers
+.form-hint {
+  font-size: 0.85rem;
+  color: $text-light;
+  margin-top: 4px;
+}
+
+.required {
+  color: $error-color;
+}
+
+// Form grid layout
+.form-grid {
+  display: grid;
+  gap: 24px;
+}
+
+// Interactive enhancements
+.form-group {
+  &:hover {
+    .form-input,
+    .form-select {
+      border-color: $border-hover;
+    }
+  }
+
+  &:focus-within {
+    transform: scale(1.02);
+    transition: transform 0.3s ease;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .registration-container {
+    padding: 24px;
+    margin: 10px;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .toggle-section {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .toggle-slider {
+    display: none;
+  }
+
+  .toggle-label {
+    border: 2px solid $border-color;
+    border-radius: $border-radius-md;
+  }
+
+  .toggle-option input[type="radio"]:checked + .toggle-label {
+    background: $primary-gradient;
+    border-color: $primary-color;
+  }
+
+  .grade-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .registration-container {
+    padding: 20px;
+  }
+
+  .header h1 {
+    font-size: 1.8rem;
+  }
+
+  .form-input,
+  .form-select {
+    padding: 14px 16px;
+  }
+
+  .submit-btn {
+    padding: 16px 24px;
+    font-size: 1rem;
+  }
+}
+
+// Loading states
+.loading {
+  .submit-btn {
+    position: relative;
+    color: transparent;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      border: 2px solid transparent;
+      border-top: 2px solid $white;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      animation: spin 1s linear infinite;
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+// Angular-specific validation styles
+.ng-invalid.ng-touched {
+  border-color: $error-color !important;
+  
+  + .form-hint {
+    color: $error-color;
+  }
+}
+
+.ng-valid.ng-touched {
+  border-color: var(--brand-green) !important;
+}
+
+// Custom scrollbar for mobile
+@media (max-width: 768px) {
+  .registration-container {
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: color-mix(in srgb, var(--brand-red) 30%, transparent);
+      border-radius: 2px;
+    }
+  }
+}

@@ -1,0 +1,64 @@
+<form [formGroup]="enseignantForm" (ngSubmit)="onSubmit()">
+  <div>
+    <label for="userSelect">Sélectionner un enseignant :</label>
+    <select id="userSelect" formControlName="userId" (change)="onUserSelected($any($event.target).value)">
+      <option value="">-- Choisir un enseignant --</option>
+      <option *ngFor="let user of users" [value]="user.id">
+        {{ user.username }} ({{ user.matricule }})
+      </option>
+    </select>
+  </div>
+
+  <div>
+    <label for="matricule">Matricule :</label>
+    <input id="matricule" type="text" formControlName="matricule" />
+  </div>
+
+  <div>
+    <label for="nom">Nom :</label>
+    <input id="nom" type="text" formControlName="nom" />
+  </div>
+
+  <div>
+    <label for="telephone">Téléphone :</label>
+    <input id="telephone" type="text" formControlName="telephone" />
+  </div>
+
+  <div>
+    <label for="email">Email :</label>
+    <input id="email" type="email" formControlName="email" />
+  </div>
+
+  <div>
+    <label for="grade">Grade :</label>
+    <select id="grade" formControlName="grade">
+      <option value="">-- Sélectionner un grade --</option>
+      <option value="CUP">CUP</option>
+      <option value="EFA">EFA</option>
+      <option value="EF">EF</option>
+      <option value="CHEFDEP">CHEFDEP</option>
+    </select>
+  </div>
+
+  <!-- Unité Pédagogique -->
+  <div class="form-group">
+    <label for="unitePedagogique">Unité Pédagogique</label>
+    <select id="unitePedagogique" formControlName="unitePedagogiqueId" required class="form-control">
+      <option value="" disabled>-- Sélectionner une unité --</option>
+      <option *ngFor="let up of unitePedagogiques" [value]="up.id">{{ up.libelle }}</option>
+    </select>
+  </div>
+
+  <!-- Module -->
+  <div class="form-group">
+    <label for="module">Module</label>
+    <select id="module" formControlName="moduleId" required class="form-control">
+      <option value="" disabled>-- Sélectionner un module --</option>
+      <option *ngFor="let mod of filteredModules" [value]="mod.id">
+        {{ mod.libelleModule }} ({{ mod.unitePedagogique.libelle }})
+      </option>
+    </select>
+  </div>
+
+  <button type="submit" [disabled]="enseignantForm.invalid">Ajouter l'enseignant</button>
+</form>

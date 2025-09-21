@@ -1,0 +1,207 @@
+<div class="module-manager-container">
+  <!-- Header Section -->
+  <div class="header">
+    <h1 class="page-title">
+      <span class="icon">📚</span>
+      Gestion des Modules
+    </h1>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="openAddForm()">
+        <span class="icon">➕</span>
+        Ajouter Module
+      </button>
+      <button class="btn btn-secondary" (click)="toggleImportSection()">
+        <span class="icon">📥</span>
+        Importer Excel
+      </button>
+    </div>
+  </div>
+
+  <!-- Message Alert -->
+  <div class="alert" *ngIf="message" [ngClass]="message.includes('Erreur') ? 'alert-error' : 'alert-success'">
+    {{ message }}
+  </div>
+
+  <!-- Import Section -->
+  <div class="import-section" *ngIf="showImportSection">
+    <div class="card">
+      <h3 class="card-title">
+        <span class="icon">📤</span>
+        Importer des Modules via Excel
+      </h3>
+      <div class="import-form">
+        <div class="file-input-wrapper">
+          <input 
+            type="file" 
+            id="fileInput"
+            (change)="onFileSelected($event)" 
+            accept=".xlsx,.xls"
+            class="file-input"
+          />
+          <label for="fileInput" class="file-label">
+            <span class="icon">📁</span>
+            {{ selectedFile ? selectedFile.name : 'Choisir un fichier Excel' }}
+          </label>
+        </div>
+        <button 
+          class="btn btn-import" 
+          (click)="importExcel()"
+          [disabled]="!selectedFile"
+        >
+          <span class="icon">🚀</span>
+          Importer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="filter-section">
+    <div class="card">
+      <h3 class="card-title">
+        <span class="icon">🏛️</span>
+        Filtrer par Unité Pédagogique
+      </h3>
+      <div class="unite-grid">
+        <div 
+          class="unite-card" 
+          [ngClass]="{'active': selectedUniteId === 0}"
+          (click)="filterModulesByUnite(0)"
+        >
+          <div class="unite-name">Toutes les UP</div>
+          <div class="module-count">{{ modules.length }} modules</div>
+        </div>
+        <div 
+          *ngFor="let unite of unites"
+          class="unite-card"
+          [ngClass]="{'active': selectedUniteId === unite.id}"
+          (click)="filterModulesByUnite(unite.id!)"
+        >
+          <div class="unite-name">{{ unite.libelle }}</div>
+          <div class="module-count">
+            {{ getModuleCountByUnite(unite.id!) }} modules
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modules List -->
+  <div class="modules-section">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <span class="icon">📋</span>
+          Liste des Modules
+          <span class="badge">{{ filteredModules.length }}</span>
+        </h3>
+      </div>
+      
+      <div class="table-container">
+        <table class="modules-table">
+          <thead>
+            <tr>
+              <th>Code Module</th>
+              <th>Libellé Module</th>
+              <th>Unité Pédagogique</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let module of filteredModules; trackBy: trackByModuleId" class="module-row">
+              <td class="code-column">
+                <span class="code-badge">{{ module.codeModule }}</span>
+              </td>
+              <td class="libelle-column">{{ module.libelleModule }}</td>
+              <td class="unite-column">
+                <span class="unite-tag">{{ module.unitePedagogique.libelle }}</span>
+              </td>
+              <td class="actions-column">
+                <button 
+                  class="btn btn-danger btn-small"
+                  (click)="deleteModule(module.id!)"
+                  title="Supprimer le module"
+                >
+                  <span class="icon">🗑️</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div *ngIf="filteredModules.length === 0" class="empty-state">
+          <div class="empty-icon">📭</div>
+          <h4>Aucun module trouvé</h4>
+          <p>{{ selectedUniteId === 0 ? 'Aucun module disponible' : 'Aucun module dans cette unité pédagogique' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Module Modal -->
+  <div class="modal-overlay" *ngIf="showAddForm" (click)="closeAddForm()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span class="icon">➕</span>
+          Ajouter un Nouveau Module
+        </h3>
+        <button class="close-btn" (click)="closeAddForm()">✕</button>
+      </div>
+      
+      <form (ngSubmit)="createModule()" class="modal-form">
+        <div class="form-group">
+          <label for="codeModule">Code Module *</label>
+          <input
+            id="codeModule"
+            type="text"
+            placeholder="Ex: INF101"
+            [(ngModel)]="newModule.codeModule"
+            name="codeModule"
+            class="form-input"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="libelleModule">Libellé Module *</label>
+          <input
+            id="libelleModule"
+            type="text"
+            placeholder="Ex: Introduction à l'informatique"
+            [(ngModel)]="newModule.libelleModule"
+            name="libelleModule"
+            class="form-input"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="uniteSelect">Unité Pédagogique *</label>
+          <select
+            id="uniteSelect"
+            [(ngModel)]="newModule.unitePedagogique.id"
+            name="uniteId"
+            class="form-select"
+            required
+          >
+            <option [ngValue]="0" disabled>-- Choisir une Unité Pédagogique --</option>
+            <option *ngFor="let up of unites" [ngValue]="up.id">
+              {{ up.libelle }}
+            </option>
+          </select>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-cancel" (click)="closeAddForm()">
+            Annuler
+          </button>
+          <button type="submit" class="btn btn-success">
+            <span class="icon">✅</span>
+            Ajouter Module
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

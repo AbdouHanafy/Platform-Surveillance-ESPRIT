@@ -1,0 +1,160 @@
+<div class="groupe-container">
+  <div class="header">
+    <h2>📚 Gestion des Groupes</h2>
+    <button class="btn-add" (click)="openAddForm()">
+      <i class="plus-icon">+</i> Ajouter Classe
+    </button>
+  </div>
+
+  <!-- Modal Form -->
+  <div class="modal-overlay" *ngIf="showForm" (click)="closeForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ isEditing ? '✏️ Modifier Classe' : '➕ Ajouter Nouvelle Classe' }}</h3>
+        <button class="close-btn" (click)="closeForm()">&times;</button>
+      </div>
+      
+      <form (ngSubmit)="saveGroupe()" class="form-grid">
+        <div class="form-group">
+          <label for="niveau">Niveau</label>
+          <input 
+            id="niveau"
+            type="text" 
+            placeholder="Ex: 4" 
+            [(ngModel)]="groupeForm.niveau" 
+            name="niveau" 
+            required 
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="option">Option</label>
+          <input 
+            id="option"
+            type="text" 
+            placeholder="Ex: SEA" 
+            [(ngModel)]="groupeForm.optionGroupe" 
+            name="optionGroupe" 
+            required 
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="numClasse">Numéro de Classe</label>
+          <input 
+            id="numClasse"
+            type="text" 
+            placeholder="Ex: 11" 
+            [(ngModel)]="groupeForm.nomClasse" 
+            name="nomClasse" 
+            required 
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="effectif">Effectif</label>
+          <input 
+            id="effectif"
+            type="number" 
+            placeholder="Nombre d'étudiants" 
+            [(ngModel)]="groupeForm.effectif" 
+            name="effectif" 
+            required 
+          />
+        </div>
+
+        <div class="form-group full-width">
+          <label for="departement">Département</label>
+          <input 
+            id="departement"
+            type="text" 
+            placeholder="Ex: Informatique" 
+            [(ngModel)]="groupeForm.departement" 
+            name="departement" 
+            required 
+          />
+        </div>
+
+        <!-- Preview -->
+        <div class="preview-section full-width" *ngIf="groupeForm.niveau && groupeForm.optionGroupe && groupeForm.nomClasse">
+          <label>Aperçu du nom de classe:</label>
+          <div class="preview-name">{{ groupeForm.niveau }}{{ groupeForm.optionGroupe }}{{ groupeForm.nomClasse }}</div>
+        </div>
+
+        <div class="form-actions full-width">
+          <button type="submit" class="btn-save">
+            {{ isEditing ? '💾 Modifier' : '✅ Ajouter' }}
+          </button>
+          <button type="button" class="btn-cancel" (click)="closeForm()">
+            ❌ Annuler
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Groupes by Option -->
+  <div class="table-container">
+    <div class="grid-header">
+      <h3>📋 Classes par Option ({{ groupes.length }} total)</h3>
+    </div>
+
+    <div class="options-container" *ngIf="groupes.length > 0">
+      <div 
+        *ngFor="let option of optionKeys" 
+        class="option-group">
+        
+        <!-- Option Header -->
+        <div class="option-header" (click)="toggleGroup(option)">
+          <div class="option-info">
+            <div class="option-icon">🎯</div>
+            <div class="option-details">
+              <h4 class="option-name">{{ option }}</h4>
+              <p class="option-count">{{ groupedGroupes[option].length }} classe(s)</p>
+            </div>
+          </div>
+          <div class="expand-icon" [class.expanded]="isGroupExpanded(option)">
+            ▼
+          </div>
+        </div>
+
+        <!-- Classes in this option -->
+        <div class="groupes-list" [class.expanded]="isGroupExpanded(option)">
+          <div 
+            *ngFor="let groupe of groupedGroupes[option]; trackBy: trackByGroupeId" 
+            class="groupe-card">
+            <div class="groupe-info">
+              <div class="classe-icon">📚</div>
+              <div class="groupe-details">
+                <h4 class="classe-name">{{ getDisplayClassName(groupe) }}</h4>
+                <div class="classe-meta">
+                  <span class="niveau-badge">Niveau {{ groupe.niveau }}</span>
+                  <span class="effectif-badge">{{ groupe.effectif }} étudiants</span>
+                </div>
+                <p class="departement">{{ groupe.departement }}</p>
+              </div>
+            </div>
+            <div class="groupe-actions">
+              <button class="btn-edit" (click)="editGroupe(groupe)" title="Modifier">
+                ✏️
+              </button>
+              <button class="btn-delete" (click)="deleteGroupe(groupe.id!)" title="Supprimer">
+                🗑️
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="groupes.length === 0">
+      <div class="empty-icon">📭</div>
+      <h3>Aucune classe disponible</h3>
+      <p>Commencez par créer votre première classe</p>
+      <button class="btn-create-first" (click)="openAddForm()">
+        ✨ Créer la première classe
+      </button>
+    </div>
+  </div>
+</div>

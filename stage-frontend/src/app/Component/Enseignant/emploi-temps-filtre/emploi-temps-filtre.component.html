@@ -1,0 +1,61 @@
+  <button class="btn btn-primary" (click)="navigateToAjouterEmploidutemps()">Ajouter Emploi du Temps</button>
+<div class="calendar-container">
+
+
+  <div class="calendar-header">
+    Emploi du temps 
+  </div>
+  
+
+  <!-- Section Filtres -->
+  <div class="filter-section" style="margin-bottom: 1rem; display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; padding: 0.5rem 1rem; background-color: #f8f9fa; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.05);">
+
+    <div class="filter-group" style="display: flex; flex-direction: column; font-weight: 600; font-size: 0.9rem; color: #333; min-width: 150px;">
+      <label for="dateFilter" style="margin-bottom: 0.3rem;">Date :</label>
+      <input id="dateFilter" type="date" [value]="selectedDate" (change)="onChangeDateFilter($event)" style="padding: 6px 8px; border-radius: 4px; border: 1px solid #bbb; font-size: 0.9rem;" />
+    </div>
+
+    <div class="filter-group" style="display: flex; flex-direction: column; font-weight: 600; font-size: 0.9rem; color: #333; min-width: 150px;">
+      <label for="enseignantFilter" style="margin-bottom: 0.3rem;">Enseignant :</label>
+      <select id="enseignantFilter" (change)="onChangeEnseignant($event)" style="padding: 6px 8px; border-radius: 4px; border: 1px solid #bbb; font-size: 0.9rem;">
+        <option value="">-- Tous --</option>
+        <option *ngFor="let ens of enseignants" [value]="ens.id">{{ ens.nom }} {{ ens.prenom }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group" style="display: flex; flex-direction: column; font-weight: 600; font-size: 0.9rem; color: #333; min-width: 150px;">
+      <label for="groupeFilter" style="margin-bottom: 0.3rem;">Groupe :</label>
+      <select id="groupeFilter" (change)="onChangeGroupe($event)" style="padding: 6px 8px; border-radius: 4px; border: 1px solid #bbb; font-size: 0.9rem;">
+        <option value="">-- Tous --</option>
+        <option *ngFor="let grp of groupes" [value]="grp.id">{{ grp.nomClasse }}</option>
+      </select>
+    </div>
+
+  </div>
+
+  <!-- Calendrier -->
+  <div class="calendar-grid">
+    <div class="time-column"></div>
+    <div class="day-header" *ngFor="let jour of jours">
+      {{ jour | date:'EEEE dd/MM' }}
+    </div>
+
+    <ng-container *ngFor="let heure of heures">
+      <div class="time-column selected">{{ heure }}</div>
+      <ng-container *ngFor="let day of [0,1,2,3,4,5,6]">
+        <div class="cell" [ngClass]="{ 'occupied': estOccupe(heure, day) }" style="border: 1px solid #ddd; padding: 6px; min-height: 70px; font-size: 0.85rem;">
+          <div *ngIf="estOccupe(heure, day)" class="room-info">
+            <div class="room-label" style="font-weight: 700; color: #007bff;">Activité</div>
+            <div class="room-number">{{ getActivite(heure, day) }}</div>
+
+            <div class="room-label" style="font-weight: 700; color: #007bff; margin-top: 0.3rem;">Salle</div>
+            <div class="room-number">{{ getSalle(heure, day) }}</div>
+
+            <div class="room-label" style="font-weight: 700; color: #007bff; margin-top: 0.3rem;">Classe</div>
+            <div class="room-number">{{ getGroupe(heure, day) }}</div>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+  </div>
+</div>
