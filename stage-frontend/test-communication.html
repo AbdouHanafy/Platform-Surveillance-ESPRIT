@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Communication Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success { background-color: #dcfce7; color: #166534; }
+        .error { background-color: #fee2e2; color: #991b1b; }
+        .info { background-color: #ffffff; color: #0b0b0b; border: 1px solid #e5e7eb; }
+        button {
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #b91c1c; }
+        .log {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔗 Backend-Frontend Communication Test</h1>
+    
+    <div class="container">
+        <h2>📊 Service Status</h2>
+        <button onclick="checkServices()">Check All Services</button>
+        <div id="serviceStatus"></div>
+    </div>
+
+    <div class="container">
+        <h2>🔌 WebSocket Test</h2>
+        <div>
+            <label>Enseignant ID:</label>
+            <input type="number" id="enseignantId" value="1" min="1">
+            <button onclick="connectWebSocket()">Connect WebSocket</button>
+            <button onclick="disconnectWebSocket()">Disconnect</button>
+            <button onclick="sendMessage()">Send Test Message</button>
+        </div>
+        <div id="wsStatus" class="status info">Not connected</div>
+        <div class="log" id="wsLog"></div>
+    </div>
+
+    <div class="container">
+        <h2>🌐 REST API Test</h2>
+        <div>
+            <button onclick="testNotificationEndpoint()">Test Notification Endpoint</button>
+            <button onclick="testUserService()">Test User Service</button>
+            <button onclick="testEmploiService()">Test Emploi Service</button>
+        </div>
+        <div id="apiStatus" class="status info">Ready to test</div>
+        <div class="log" id="apiLog"></div>
+    </div>
+
+    <script>
+        let stompClient = null;
+        let connected = false;
+
+        function log(message, type = 'INFO', target = 'wsLog') {
+            const logDiv = document.getElementById(target);
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] [${type}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function checkServices() {
+            const services = [
+                { name: 'Eureka Server', port: 8761 },
+                { name: 'Config Server', port: 8888 },
+                { name: 'Gateway', port: 8065 },
+                { name: 'User Service', port: 8088 },
+                { name: 'Emploi Du Temps', port: 8090 },
+                { name: 'Fraude Service', port: 8091 },
+                { name: 'Notifications', port: 8092 },
+                { name: 'Salle Service', port: 8093 }
+            ];
+
+            const statusDiv = document.getElementById('serviceStatus');
+            let results = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">';
+
+            for (const service of services) {
+                try {
+                    const response = await fetch(`http://localhost:${service.port}`, { mode: 'no-cors' });
+                    results += `<div class="status success">✅ ${service.name} (${service.port})</div>`;
+                } catch (error) {
+                    results += `<div class="status error">❌ ${service.name} (${service.port})</div>`;
+                }
+            }
+
+            results += '</div>';
+            statusDiv.innerHTML = results;
+        }
+
+        function connectWebSocket() {
+            const enseignantId = document.getElementById('enseignantId').value;
+            const statusDiv = document.getElementById('wsStatus');
+
+            log('Connecting to WebSocket...', 'INFO');
+
+            stompClient = new StompJs.Client({
+                brokerURL: 'ws://localhost:8090/ws',
+                reconnectDelay: 5000,
+                debug: (str) => log(`Debug: ${str}`, 'DEBUG'),
+                connectHeaders: {
+                    'id': enseignantId
+                }
+            });
+
+            stompClient.onConnect = (frame) => {
+                connected = true;
+                statusDiv.className = 'status success';
+                statusDiv.textContent = 'Connected to WebSocket';
+                log('WebSocket connected successfully', 'SUCCESS');
+
+                // Subscribe to notifications
+                stompClient.subscribe(`/user/${enseignantId}/queue/notifications`, (message) => {
+                    log(`Received user notification: ${message.body}`, 'INFO');
+                });
+
+                stompClient.subscribe('/topic/notifications', (message) => {
+                    log(`Received topic notification: ${message.body}`, 'INFO');
+                });
+
+                stompClient.subscribe(`/topic/enseignant/${enseignantId}`, (message) => {
+                    log(`Received enseignant notification: ${message.body}`, 'INFO');
+                });
+            };
+
+            stompClient.onStompError = (frame) => {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = 'WebSocket Error: ' + frame.headers['message'];
+                log(`WebSocket error: ${frame.headers['message']}`, 'ERROR');
+            };
+
+            stompClient.activate();
+        }
+
+        function disconnectWebSocket() {
+            if (stompClient) {
+                stompClient.deactivate();
+                connected = false;
+                document.getElementById('wsStatus').className = 'status info';
+                document.getElementById('wsStatus').textContent = 'Disconnected';
+                log('WebSocket disconnected', 'INFO');
+            }
+        }
+
+        function sendMessage() {
+            if (!connected) {
+                alert('Please connect to WebSocket first');
+                return;
+            }
+
+            const message = `Test message from browser - ${new Date().toLocaleTimeString()}`;
+            stompClient.publish({
+                destination: '/app/send-notification',
+                body: message
+            });
+
+            log(`Sent message: ${message}`, 'INFO');
+        }
+
+        async function testNotificationEndpoint() {
+            const enseignantId = document.getElementById('enseignantId').value;
+            log('Testing notification endpoint...', 'INFO', 'apiLog');
+
+            try {
+                const response = await fetch(`http://localhost:8090/test-notif/${enseignantId}`);
+                const data = await response.text();
+                log(`Notification test successful: ${data}`, 'SUCCESS', 'apiLog');
+                document.getElementById('apiStatus').className = 'status success';
+                document.getElementById('apiStatus').textContent = 'Notification test successful';
+            } catch (error) {
+                log(`Notification test failed: ${error.message}`, 'ERROR', 'apiLog');
+                document.getElementById('apiStatus').className = 'status error';
+                document.getElementById('apiStatus').textContent = 'Notification test failed';
+            }
+        }
+
+        async function testUserService() {
+            log('Testing user service...', 'INFO', 'apiLog');
+
+            try {
+                const response = await fetch('http://localhost:8088/auth/test');
+                const data = await response.text();
+                log(`User service test successful: ${data}`, 'SUCCESS', 'apiLog');
+            } catch (error) {
+                log(`User service test failed: ${error.message}`, 'ERROR', 'apiLog');
+            }
+        }
+
+        async function testEmploiService() {
+            log('Testing emploi service...', 'INFO', 'apiLog');
+
+            try {
+                const response = await fetch('http://localhost:8090/ensignat/getAllEnseignants');
+                const data = await response.text();
+                log(`Emploi service test successful: ${data.substring(0, 100)}...`, 'SUCCESS', 'apiLog');
+            } catch (error) {
+                log(`Emploi service test failed: ${error.message}`, 'ERROR', 'apiLog');
+            }
+        }
+
+        // Auto-check services on page load
+        window.onload = function() {
+            log('Test interface loaded', 'INFO');
+            checkServices();
+        };
+    </script>
+</body>
+</html>
