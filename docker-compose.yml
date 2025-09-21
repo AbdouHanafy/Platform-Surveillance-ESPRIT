@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: surveillance_exams
+      MYSQL_DATABASE: userdemo
       MYSQL_USER: admin
       MYSQL_PASSWORD: admin
     ports:
@@ -27,8 +27,8 @@ services:
   # Eureka Server (Service Discovery)
   eureka-server:
     build:
-      context: ./stage backend/stage backend/eureka
-      dockerfile: ../../Dockerfile.backend
+      context: ./stage-backend/eureka
+      dockerfile: Dockerfile
     container_name: eureka-server
     restart: unless-stopped
     ports:
@@ -48,8 +48,8 @@ services:
   # Config Server
   config-server:
     build:
-      context: ./stage backend/stage backend/config-server
-      dockerfile: ../../Dockerfile.backend
+      context: ./stage-backend/config-server
+      dockerfile: Dockerfile
     container_name: config-server
     restart: unless-stopped
     ports:
@@ -73,8 +73,8 @@ services:
   # API Gateway
   api-gateway:
     build:
-      context: ./stage backend/stage backend/gateway
-      dockerfile: ../../Dockerfile.backend
+      context: ./stage-backend/gateway
+      dockerfile: Dockerfile
     container_name: api-gateway
     restart: unless-stopped
     ports:
@@ -101,20 +101,20 @@ services:
   # User Service
   user-service:
     build:
-      context: ./stage backend/stage backend/microserviceUser
-      dockerfile: ../../Dockerfile.backend
+      context: ./stage-backend/microserviceUser
+      dockerfile: Dockerfile
     container_name: user-service
     restart: unless-stopped
     ports:
-      - "8081:8081"
+      - "8088:8088"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SERVER_PORT=8081
+      - SERVER_PORT=8088
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/surveillance_exams
-      - SPRING_DATASOURCE_USERNAME=admin
-      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/userdemo
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
     depends_on:
       mysql:
         condition: service_healthy
@@ -125,7 +125,7 @@ services:
     networks:
       - microservices-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8088/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -134,20 +134,20 @@ services:
   # Emploi Du Temps Service
   emploi-temps-service:
     build:
-      context: ./stage backend/stage backend/microserviceEmploiDuTemps
-      dockerfile: ../../Dockerfile.backend
+      context: ./stage-backend/microserviceEmploiDuTemps
+      dockerfile: Dockerfile
     container_name: emploi-temps-service
     restart: unless-stopped
     ports:
-      - "8082:8082"
+      - "8090:8090"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SERVER_PORT=8082
+      - SERVER_PORT=8090
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/surveillance_exams
-      - SPRING_DATASOURCE_USERNAME=admin
-      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/userdemo
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
     depends_on:
       mysql:
         condition: service_healthy
@@ -158,7 +158,7 @@ services:
     networks:
       - microservices-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -167,20 +167,20 @@ services:
   # Gestion Des Fraude Service
   fraude-service:
     build:
-      context: ./stage backend/stage backend/microserviceGestionDesFraude
-      dockerfile: ../../Dockerfile.backend
+      context: ./stage-backend/microserviceGestionDesFraude
+      dockerfile: Dockerfile
     container_name: fraude-service
     restart: unless-stopped
     ports:
-      - "8083:8083"
+      - "8091:8091"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SERVER_PORT=8083
+      - SERVER_PORT=8091
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/surveillance_exams
-      - SPRING_DATASOURCE_USERNAME=admin
-      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/userdemo
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
     depends_on:
       mysql:
         condition: service_healthy
@@ -191,7 +191,7 @@ services:
     networks:
       - microservices-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8091/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -200,20 +200,20 @@ services:
   # Gestion Des Notifications Service
   notifications-service:
     build:
-      context: ./stage backend/stage backend/microserviceGestionDesNotifications
-      dockerfile: ../../Dockerfile.backend
+      context: ./stage-backend/microserviceGestionDesNotifications
+      dockerfile: Dockerfile
     container_name: notifications-service
     restart: unless-stopped
     ports:
-      - "8084:8084"
+      - "8092:8092"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SERVER_PORT=8084
+      - SERVER_PORT=8092
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/surveillance_exams
-      - SPRING_DATASOURCE_USERNAME=admin
-      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/userdemo
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
     depends_on:
       mysql:
         condition: service_healthy
@@ -224,7 +224,7 @@ services:
     networks:
       - microservices-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8092/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -233,20 +233,20 @@ services:
   # Gestion Des Salles Service
   salles-service:
     build:
-      context: ./stage backend/stage backend/microserviceGestionDesSalles
-      dockerfile: ../../Dockerfile.backend
+      context: ./stage-backend/microserviceGestionDesSalles
+      dockerfile: Dockerfile
     container_name: salles-service
     restart: unless-stopped
     ports:
-      - "8085:8085"
+      - "8093:8093"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SERVER_PORT=8085
+      - SERVER_PORT=8093
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/surveillance_exams
-      - SPRING_DATASOURCE_USERNAME=admin
-      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/userdemo
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
     depends_on:
       mysql:
         condition: service_healthy
@@ -257,7 +257,7 @@ services:
     networks:
       - microservices-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8093/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -266,8 +266,8 @@ services:
   # Frontend Angular Application
   frontend:
     build:
-      context: ./stage frontend/stage frontend/Platforme_MicroService_Surveillances
-      dockerfile: ../../../Dockerfile.frontend
+      context: ./stage-frontend/Platforme_MicroService_Surveillances
+      dockerfile: Dockerfile
     container_name: frontend-app
     restart: unless-stopped
     ports:
