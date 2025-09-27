@@ -1,63 +1,139 @@
 <div class="affectation-container">
-  <h2>🧩 Affecter Module à des Classes</h2>
+  <div class="header-section">
+    <h2>🧩 Affecter Module à des Classes</h2>
+    <p class="subtitle">Assignez des modules aux classes pour organiser l'enseignement</p>
+  </div>
 
   <form (ngSubmit)="affecter()" class="form-section" novalidate>
-    <!-- Module -->
-    <div>
-      <label for="moduleSelect">Module</label>
-      <select id="moduleSelect" [(ngModel)]="selectedModuleId" name="module" required>
-              <option value="" disabled selected>-- Choisir un module --</option>
-        <option *ngFor="let module of modules" [value]="module.id">
-          {{ module.libelleModule }}
-        </option>
-      </select>
+    <!-- Step 1: Module Selection -->
+    <div class="form-step">
+      <div class="step-header">
+        <span class="step-number">1</span>
+        <h3>📚 Sélectionner le Module</h3>
+      </div>
+      <div class="form-group">
+        <label for="moduleSelect">
+          <i class="pi pi-book"></i>
+          Module à assigner
+        </label>
+        <select id="moduleSelect" [(ngModel)]="selectedModuleId" name="module" required class="form-control">
+          <option value="" disabled selected>-- Choisir un module --</option>
+          <option *ngFor="let module of modules" [value]="module.id">
+            {{ module.libelleModule }}
+          </option>
+        </select>
+        <div class="form-help" *ngIf="selectedModuleId">
+          <i class="pi pi-check-circle"></i>
+          Module sélectionné: {{ getSelectedModuleName() }}
+        </div>
+      </div>
     </div>
 
-    <!-- Option Classe -->
-    <div>
-      <label for="optionSelect">Option</label>
-     <select
-  [(ngModel)]="selectedOptionGroupe"
-  (change)="onOptionGroupeChange($event)"
-  name="optionGroupe"
-  required
->
-  <option *ngFor="let option of optionsGroupe" [value]="option">{{ option }}</option>
-</select>
-
+    <!-- Step 2: Period Selection -->
+    <div class="form-step">
+      <div class="step-header">
+        <span class="step-number">2</span>
+        <h3>📅 Sélectionner la Période</h3>
+      </div>
+      <div class="form-group">
+        <label for="periodeSelect">
+          <i class="pi pi-calendar"></i>
+          Période académique
+        </label>
+        <select id="periodeSelect" [(ngModel)]="selectedPeriode" name="periode" required class="form-control">
+          <option *ngFor="let p of periodes" [value]="p">{{ getPeriodeDisplayName(p) }}</option>
+        </select>
+        <div class="form-help">
+          <i class="pi pi-info-circle"></i>
+          Choisissez la période pendant laquelle ce module sera enseigné
+        </div>
+      </div>
     </div>
 
-    <!-- Classes filtrées par option -->
-    <div class="full-width">
-     <label for="groupesSelect">Classes (sélection multiple possible)</label>
-<select
-  id="groupesSelect"
-  multiple
-  [(ngModel)]="selectedGroupeIds"
-  name="groupes"
-  required
-  size="6"
->
-  <option *ngFor="let g of filteredGroupes" [value]="g.id">
-    {{ getDisplayClassName(g) }} — Niveau: {{ g.niveau }} — Effectif: {{ g.effectif }} — Département: {{ g.departement }}
-  </option>
-</select>
-
+    <!-- Step 3: Class Filtering -->
+    <div class="form-step">
+      <div class="step-header">
+        <span class="step-number">3</span>
+        <h3>🎯 Filtrer les Classes</h3>
+      </div>
+      <div class="form-group">
+        <label for="optionSelect">
+          <i class="pi pi-filter"></i>
+          Option de classe
+        </label>
+        <select
+          id="optionSelect"
+          [(ngModel)]="selectedOptionGroupe"
+          (change)="onOptionGroupeChange($event)"
+          name="optionGroupe"
+          required
+          class="form-control"
+        >
+          <option value="" disabled>-- Toutes les options --</option>
+          <option *ngFor="let option of optionsGroupe" [value]="option">{{ option }}</option>
+        </select>
+        <div class="form-help" *ngIf="selectedOptionGroupe">
+          <i class="pi pi-check-circle"></i>
+          {{ filteredGroupes.length }} classe(s) trouvée(s) pour l'option {{ selectedOptionGroupe }}
+        </div>
+      </div>
     </div>
 
-    <!-- Période -->
-    <div>
-      <label for="periodeSelect">Période</label>
-      <select id="periodeSelect" [(ngModel)]="selectedPeriode" name="periode" required>
-        <option *ngFor="let p of periodes" [value]="p">{{ p }}</option>
-      </select>
+    <!-- Step 4: Class Selection -->
+    <div class="form-step">
+      <div class="step-header">
+        <span class="step-number">4</span>
+        <h3>👥 Sélectionner les Classes</h3>
+      </div>
+      <div class="form-group full-width">
+        <label for="groupesSelect">
+          <i class="pi pi-users"></i>
+          Classes à assigner (sélection multiple)
+        </label>
+        <div class="classes-selection-container">
+          <select
+            id="groupesSelect"
+            multiple
+            [(ngModel)]="selectedGroupeIds"
+            name="groupes"
+            required
+            size="6"
+            class="form-control classes-select"
+          >
+            <option *ngFor="let g of filteredGroupes" [value]="g.id">
+              {{ getDisplayClassName(g) }} — Niveau: {{ g.niveau }} — Effectif: {{ g.effectif }} — Département: {{ g.departement }}
+            </option>
+          </select>
+          <div class="selection-info">
+            <div class="selection-count">
+              <i class="pi pi-check-circle"></i>
+              {{ selectedGroupeIds.length }} classe(s) sélectionnée(s)
+            </div>
+            <div class="selection-actions">
+              <button type="button" class="btn-select-all" (click)="selectAllClasses()">
+                <i class="pi pi-check-square"></i> Tout sélectionner
+              </button>
+              <button type="button" class="btn-clear-selection" (click)="clearSelection()">
+                <i class="pi pi-times"></i> Effacer
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="form-help">
+          <i class="pi pi-info-circle"></i>
+          Maintenez Ctrl (Cmd sur Mac) pour sélectionner plusieurs classes
+        </div>
+      </div>
     </div>
 
-    <div></div> <!-- vide pour garder grille alignée -->
-
-    <button type="submit" class="btn-affecter" aria-label="Affecter le module aux classes">
-      ✅ Affecter
-    </button>
+    <!-- Submit Button -->
+    <div class="form-actions">
+      <button type="submit" class="btn-affecter" [disabled]="!isFormValid()" aria-label="Affecter le module aux classes">
+        <i class="pi pi-check"></i>
+        <span>✅ Affecter le Module</span>
+        <span class="btn-loading-text" *ngIf="isLoading">En cours...</span>
+      </button>
+    </div>
   </form>
 
   <hr />

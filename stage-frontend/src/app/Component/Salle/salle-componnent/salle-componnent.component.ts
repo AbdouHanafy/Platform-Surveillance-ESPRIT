@@ -4,6 +4,7 @@ import { SalleService, ReservationSalle } from '../../../Service/salle-service.s
 import { EnseignantService } from '../../../Service/enseignant-service.service';
 import { CommonModule, NgFor } from '@angular/common';
 import { EmploiDuTemps, EmploiDuTempsService } from '../../../Service/emploi-du-temps.service';
+import { SalleReservation } from '../../../Entity/SalleReservation';
 
 @Component({
   selector: 'app-salle-componnent',
@@ -37,6 +38,11 @@ export class SalleComponnentComponent implements OnInit{
   isDisponibilitesModalOpen = false;
 disponibilites: EmploiDuTemps[] = [];
   disponibilitesError: string | null = null;
+
+  // Modal Réservations d'Examens
+  isExamensModalOpen = false;
+  examensReservations: SalleReservation[] = [];
+  examensError: string | null = null;
 
   constructor(
     private salleService: SalleService,
@@ -188,6 +194,32 @@ closeDisponibilitesModal(): void {
   this.selectedSalle = null;
   this.disponibilites = [];
   this.disponibilitesError = null;
+}
+
+// ==== Modal Réservations d'Examens ====
+openExamensModal(salle: any): void {
+  this.selectedSalle = salle;
+  this.examensError = null;
+  this.examensReservations = [];
+
+  this.salleService.getSalleExamens(salle.id).subscribe({
+    next: (reservations) => {
+      this.examensReservations = reservations;
+      this.isExamensModalOpen = true;
+    },
+    error: (err) => {
+      console.error('Erreur chargement examens salle', err);
+      this.examensError = 'Impossible de charger les réservations d\'examens.';
+      this.isExamensModalOpen = true;
+    },
+  });
+}
+
+closeExamensModal(): void {
+  this.isExamensModalOpen = false;
+  this.selectedSalle = null;
+  this.examensReservations = [];
+  this.examensError = null;
 }
 
 selectedFile: File | null = null;

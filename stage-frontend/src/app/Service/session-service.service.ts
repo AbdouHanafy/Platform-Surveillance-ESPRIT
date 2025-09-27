@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Session } from '../Entity/Session';
+import { MyModule } from '../Entity/module.model';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -14,7 +15,13 @@ export class SessionServiceService {
    constructor(private http: HttpClient) {}
 
   getAll(): Observable<Session[]> {
-    return this.http.get<Session[]>(this.apiUrl);
+    console.log('SessionService: Making GET request to:', this.apiUrl);
+    return this.http.get<Session[]>(this.apiUrl, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
   }
 
   getById(id: number): Observable<Session> {
@@ -31,6 +38,19 @@ export class SessionServiceService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  // Module assignment methods
+  assignModulesToSession(sessionId: number, moduleIds: number[]): Observable<Session> {
+    return this.http.post<Session>(`${this.apiUrl}/${sessionId}/modules`, moduleIds);
+  }
+
+  getSessionModules(sessionId: number): Observable<number[]> {
+    return this.http.get<number[]>(`${this.apiUrl}/${sessionId}/modules`);
+  }
+
+  removeModuleFromSession(sessionId: number, moduleId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${sessionId}/modules/${moduleId}`);
   }
 }
 

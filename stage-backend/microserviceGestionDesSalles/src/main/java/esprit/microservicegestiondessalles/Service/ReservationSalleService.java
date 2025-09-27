@@ -28,6 +28,7 @@ import java.util.List;
 public class ReservationSalleService {
 
     private final ReservationSalleRepository reservationRepository;
+    private final ExamenValidationService examenValidationService;
     private final HistoriqueReservationRepository historiqueRepository;
     private final EmploiDuTempsRepository emploiDuTempsRepository;
     private final SalleRepository salleRepository;
@@ -83,6 +84,14 @@ public class ReservationSalleService {
 
             if (!isEnseignantDisponible(enseignant.getId(), date, debut, fin)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Enseignant non disponible sur ce créneau.");
+            }
+
+            // Validation de la date d'examen par rapport à la période de session du module
+            if (reservation.getModuleId() != null) {
+                String validationError = examenValidationService.getValidationErrorMessage(reservation.getModuleId(), date);
+                if (validationError != null) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, validationError);
+                }
             }
 
             reservation.setEnseignantId(enseignant.getId());

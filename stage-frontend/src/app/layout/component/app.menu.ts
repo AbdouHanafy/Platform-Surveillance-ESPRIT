@@ -401,6 +401,7 @@ export class AppMenu implements OnInit {
         label: 'Affectations',
         styleClass: 'affectations-section',
         items: [
+          { label: 'Classes ↔ Modules', icon: 'pi pi-fw pi-link', routerLink: ['/affectation'] },
           { label: 'Affectation Modules', icon: 'pi pi-fw pi-calendar', routerLink: ['/affectation-module-calendar'] },
           { label: 'Affectation Salles Auto', icon: 'pi pi-fw pi-home', routerLink: ['/affectation-salle-auto'] },
           { label: 'Affectation Enseignants Auto', icon: 'pi pi-fw pi-users', routerLink: ['/affectation-enseignant-auto'] }

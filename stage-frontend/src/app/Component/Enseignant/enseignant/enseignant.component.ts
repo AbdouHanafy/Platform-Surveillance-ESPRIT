@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { UnitePedagogique } from '../../../Entity/unite-pedagogique.model';
+import { TeacherSurveillance } from '../../../Entity/TeacherSurveillance';
+import { ExamenChronoService } from '../../../Service/examen-chrono.service';
 
 @Component({
   selector: 'app-enseignant',
@@ -15,11 +17,13 @@ import { UnitePedagogique } from '../../../Entity/unite-pedagogique.model';
 export class EnseignantComponent implements OnInit {
   enseignants: Enseignant[] = [];
   unitePedagogiques: UnitePedagogique[] = [];
+  teacherSurveillance: TeacherSurveillance[] = [];
   loading: boolean = true;
   role: string = ''; // récupérer depuis le token/session
 
   constructor(
     private enseignantService: EnseignantService,
+    private examenChronoService: ExamenChronoService,
     private router: Router
   ) {}
 
@@ -34,7 +38,8 @@ export class EnseignantComponent implements OnInit {
     try {
       await Promise.all([
         this.loadUnitePedagogiques(),
-        this.loadEnseignants()
+        this.loadEnseignants(),
+        this.loadTeacherSurveillance()
       ]);
       // filtrer les enseignants si ENSEIGNANT
       if (this.role === 'ENSEIGNANT') {
@@ -72,6 +77,21 @@ export class EnseignantComponent implements OnInit {
         },
         error: (err) => {
           console.error('Erreur chargement enseignants:', err);
+          reject(err);
+        }
+      });
+    });
+  }
+
+  loadTeacherSurveillance(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.examenChronoService.getTeacherSurveillanceHours().subscribe({
+        next: (data) => {
+          this.teacherSurveillance = data;
+          resolve();
+        },
+        error: (err) => {
+          console.error('Erreur chargement surveillance enseignants:', err);
           reject(err);
         }
       });
@@ -163,5 +183,26 @@ export class EnseignantComponent implements OnInit {
 
   canAdd(): boolean {
     return this.role === 'SUPER_ADMIN';
+  }
+
+  // 📊 Méthodes pour les heures de surveillance
+  getTeacherSurveillanceHours(teacherId: number | undefined): TeacherSurveillance | undefined {
+    if (!teacherId) return undefined;
+    return this.teacherSurveillance.find(s => s.teacherId === teacherId);
+  }
+
+  getSurveillanceStatusClass(status: string): string {
+    switch (status) {
+      case 'LIBRE': return 'status-libre';
+      case 'LÉGER': return 'status-leger';
+      case 'NORMAL': return 'status-normal';
+      case 'SURCHARGÉ': return 'status-surcharge';
+      default: return 'status-unknown';
+    }
+  }
+
+  // Helper method to get surveillance data safely
+  getSurveillanceData(teacherId: number | undefined) {
+    return this.getTeacherSurveillanceHours(teacherId);
   }
 }

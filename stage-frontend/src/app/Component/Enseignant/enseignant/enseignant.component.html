@@ -12,6 +12,7 @@
     <p>Chargement des enseignants...</p>
   </div>
 
+
   <!-- Empty state -->
   <div class="empty-state" *ngIf="!loading && enseignants.length === 0">
     <div class="empty-icon">👨‍🏫</div>
@@ -33,6 +34,7 @@
           <th>🏢 Unité pédagogique</th>
           <th>🎓 Grade</th>
           <th>🆔 Matricule</th>
+          <th>⏰ Heures de Surveillance</th>
           <!-- Actions uniquement pour SUPER_ADMIN et ADMIN -->
           <th *ngIf="role !== 'ENSEIGNANT'">⚙️ Actions</th>
         </tr>
@@ -45,6 +47,19 @@
           <td data-label="Unité pédagogique">{{ getLibelleUnitePedagogique(ens.unitePedagogique?.id) }}</td>
           <td data-label="Grade">{{ getGradeIcon(ens.grade) }} {{ getGradeLibelle(ens.grade) }}</td>
           <td data-label="Matricule">{{ ens.matricule }}</td>
+          <td data-label="Heures de Surveillance">
+            <div class="surveillance-info">
+              <span class="surveillance-hours" [class]="getSurveillanceStatusClass(getSurveillanceData(ens.id)?.status || 'LIBRE')">
+                {{ getSurveillanceData(ens.id)?.surveillanceHours || 0 }}h
+              </span>
+              <span class="surveillance-exams">
+                ({{ getSurveillanceData(ens.id)?.numberOfExams || 0 }} examens)
+              </span>
+              <span class="surveillance-status" [class]="getSurveillanceStatusClass(getSurveillanceData(ens.id)?.status || 'LIBRE')">
+                {{ getSurveillanceData(ens.id)?.statusColor || '🟢' }} {{ getSurveillanceData(ens.id)?.status || 'LIBRE' }}
+              </span>
+            </div>
+          </td>
           <!-- Actions -->
           <td *ngIf="role !== 'ENSEIGNANT'">
             <div class="action-buttons">

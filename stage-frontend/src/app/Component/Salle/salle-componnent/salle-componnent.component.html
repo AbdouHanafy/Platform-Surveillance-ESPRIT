@@ -27,6 +27,7 @@
         <td>
           <button class="btn btn-primary" (click)="openReservationModal(salle)">Réserver</button>
           <button class="btn btn-info ms-2" (click)="openDisponibilitesModal(salle)">Voir disponibilités</button>
+          <button class="btn btn-success ms-2" (click)="openExamensModal(salle)">📊 Voir Examens</button>
         </td>
       </tr>
     </tbody>
@@ -164,5 +165,82 @@
 <button class="btn btn-success" [disabled]="!selectedFile" (click)="uploadFile()">
   Importer Salles depuis Excel
 </button>
+
+  <!-- Modal Réservations d'Examens -->
+  <div class="modal-backdrop" *ngIf="isExamensModalOpen" (click)="closeExamensModal()"></div>
+  <div class="modal" *ngIf="isExamensModalOpen" role="dialog" aria-modal="true" aria-labelledby="examensModalTitle">
+    <div class="modal-header">
+      <h3 id="examensModalTitle">📊 Réservations d'Examens - {{ selectedSalle?.bloc }}{{ selectedSalle?.etage }}{{ selectedSalle?.nom }}</h3>
+      <button class="close-btn" (click)="closeExamensModal()" aria-label="Fermer">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div *ngIf="examensError" class="alert alert-danger">
+        {{ examensError }}
+      </div>
+      
+      <div *ngIf="examensReservations.length === 0 && !examensError" class="alert alert-info">
+        <strong>ℹ️ Aucune réservation d'examen trouvée</strong><br>
+        Cette salle n'a pas encore été utilisée pour des examens.
+      </div>
+
+      <div *ngIf="examensReservations.length > 0">
+        <div class="reservations-summary mb-3">
+          <strong>📈 Résumé:</strong> {{ examensReservations.length }} examen(s) programmé(s)
+        </div>
+        
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>📅 Date</th>
+                <th>⏰ Séance</th>
+                <th>📚 Module</th>
+                <th>👥 Groupe</th>
+                <th>👨‍🏫 Enseignant</th>
+                <th>📊 Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let reservation of examensReservations">
+                <td>
+                  <span class="date-badge">
+                    {{ reservation.dateExamen | date:'dd/MM/yyyy' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="seance-badge">
+                    {{ reservation.seance }}
+                  </span>
+                </td>
+                <td>
+                  <span class="module-badge">
+                    {{ reservation.moduleLibelle }}
+                  </span>
+                </td>
+                <td>
+                  <span class="groupe-badge">
+                    {{ reservation.groupeNom }}
+                  </span>
+                </td>
+                <td>
+                  <span class="enseignant-badge">
+                    {{ reservation.enseignantNom }} {{ reservation.enseignantPrenom }}
+                  </span>
+                </td>
+                <td>
+                  <span class="statut-badge" [class]="'statut-' + reservation.statut.toLowerCase()">
+                    {{ reservation.statut }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeExamensModal()">Fermer</button>
+    </div>
+  </div>
 
 </div>

@@ -32,7 +32,7 @@ public class GatewayApplication {
 
 
 				.route("microserviceGestionDesSalles",
-						r->r.path("/salles/**" , "/reservations/**")
+						r->r.path("/salles/**" , "/reservations/**", "/sessions/**")
 								.uri("lb://microserviceGestionDesSalles"))
 
 				.build();

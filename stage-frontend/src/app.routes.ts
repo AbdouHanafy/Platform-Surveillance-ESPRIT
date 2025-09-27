@@ -53,6 +53,7 @@ export const appRoutes: Routes = [
         {path:'module_manger',component: ModuleManagerComponent},
         {path:'groupe_manager',component: GroupeManagerComponent},
          {path:'AffectationClasse',component:AffectationComponent},
+         {path:'affectation',component:AffectationComponent},
          {path:'affectation-module-calendar',component:AffectationModuleCalendarComponent},
          {path:'affectation-salle-auto',component:AffectationSalleAutoComponent},
          {path:'affectation-enseignant-auto',component:AffectationEnseignantAutoComponent},

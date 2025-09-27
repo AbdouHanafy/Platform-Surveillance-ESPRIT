@@ -47,9 +47,29 @@
   <div *ngIf="showForm" class="form-container">
     <form [formGroup]="examenForm" (ngSubmit)="onSubmit()" class="exam-form">
 
+      <!-- Step 1: Select Session -->
+      <div class="form-group">
+        <label for="session">1️⃣ Session</label>
+        <select id="session" formControlName="sessionId" class="form-control">
+          <option value="" disabled>Sélectionnez une session</option>
+          <option *ngFor="let session of sessions" [value]="session.id">
+            {{ session.nom_session }}
+            <span *ngIf="session.dateDebut && session.dateFin">
+              ({{ session.dateDebut | date:'dd/MM' }} - {{ session.dateFin | date:'dd/MM' }})
+            </span>
+          </option>
+        </select>
+        <div *ngIf="examenForm.get('sessionId')?.touched && examenForm.get('sessionId')?.invalid" class="error-msg">
+          La session est obligatoire.
+        </div>
+        <div *ngIf="examenForm.get('sessionId')?.value && filteredModules.length === 0" class="warning-msg">
+          ⚠️ Aucun module n'est assigné à cette session. Veuillez d'abord assigner des modules à la session.
+        </div>
+      </div>
+
       <div class="form-row">
         <div class="form-group">
-          <label for="periode">Période</label>
+          <label for="periode">2️⃣ Période</label>
           <select id="periode" formControlName="periode" class="form-control">
             <option value="" disabled>Sélectionnez une période</option>
             <option *ngFor="let periode of periodes" [value]="periode">
@@ -62,22 +82,27 @@
         </div>
 
         <div class="form-group">
-          <label for="module">Module</label>
-          <select id="module" formControlName="moduleId" class="form-control" [disabled]="!modules.length">
-            <option value="" disabled>Sélectionnez un module</option>
-            <option *ngFor="let module of modules" [value]="module.id">
+          <label for="module">3️⃣ Module (assigné à la session)</label>
+          <select id="module" formControlName="moduleId" class="form-control" [disabled]="!filteredModules.length">
+            <option value="" disabled>
+              {{ filteredModules.length > 0 ? 'Sélectionnez un module' : 'Aucun module assigné à cette session' }}
+            </option>
+            <option *ngFor="let module of filteredModules" [value]="module.id">
               {{ module.libelleModule }}
             </option>
           </select>
           <div *ngIf="examenForm.get('moduleId')?.touched && examenForm.get('moduleId')?.invalid" class="error-msg">
             Le module est obligatoire.
           </div>
+          <div *ngIf="filteredModules.length > 0" class="info-msg">
+            ✅ {{ filteredModules.length }} module(s) disponible(s) pour cette session
+          </div>
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <label for="dateExamen">Date d'examen</label>
+          <label for="dateExamen">4️⃣ Date d'examen</label>
           <input
             type="date"
             id="dateExamen"
@@ -92,7 +117,7 @@
         </div>
 
         <div class="form-group">
-          <label for="seance">Séance</label>
+          <label for="seance">5️⃣ Séance</label>
           <select id="seance" formControlName="seance" class="form-control">
             <option value="" disabled>Sélectionnez une séance</option>
             <option *ngFor="let seance of seances" [value]="seance">
@@ -102,19 +127,6 @@
           <div *ngIf="examenForm.get('seance')?.touched && examenForm.get('seance')?.invalid" class="error-msg">
             La séance est obligatoire.
           </div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="session">Session</label>
-        <select id="session" formControlName="sessionId" class="form-control">
-          <option value="" disabled>Sélectionnez une session</option>
-          <option *ngFor="let session of sessions" [value]="session.id">
-            {{ session.nom_session }}
-          </option>
-        </select>
-        <div *ngIf="examenForm.get('sessionId')?.touched && examenForm.get('sessionId')?.invalid" class="error-msg">
-          La session est obligatoire.
         </div>
       </div>
 

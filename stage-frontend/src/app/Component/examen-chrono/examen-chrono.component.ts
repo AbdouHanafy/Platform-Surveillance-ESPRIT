@@ -49,6 +49,8 @@ export class ExamenChronoComponent implements OnInit {
   examenForm: FormGroup;
   examens: ExamenChrono[] = [];
   modules: MyModule[] = [];
+  allModules: MyModule[] = []; // Store all modules for filtering
+  filteredModules: MyModule[] = []; // Modules filtered by selected session
   groupes: Groupe[] = [];
   sessions: Session[] = [];
   enseignants: Enseignant[] = [];
@@ -109,6 +111,14 @@ export class ExamenChronoComponent implements OnInit {
     this.notificationService.connect(enseignantId);
   }
 
+    // Session selection triggers module filtering
+    this.examenForm.get('sessionId')?.valueChanges.subscribe(sessionId => {
+      console.log('Session changed to:', sessionId);
+      this.filterModulesBySession(sessionId);
+      this.groupes = [];
+      this.examenForm.patchValue({ moduleId: '', dateExamen: '', seance: '' });
+    });
+
     this.examenForm.get('periode')?.valueChanges.subscribe(periode => {
       this.loadModulesByPeriode(periode);
       this.groupes = [];
@@ -156,7 +166,9 @@ export class ExamenChronoComponent implements OnInit {
   loadModulesByPeriode(periode: string): void {
     this.affectationService.getModulesByPeriode(periode).subscribe({
       next: modules => {
-        this.modules = modules;
+        this.allModules = modules; // Store all modules
+        this.modules = modules; // Keep current behavior for now
+        this.filteredModules = modules; // Initialize filtered modules
         this.isLoading = false;
       },
       error: err => {
@@ -174,6 +186,36 @@ export class ExamenChronoComponent implements OnInit {
         this.groupes = [];
       }
     });
+  }
+
+  filterModulesBySession(sessionId: number): void {
+    console.log('Filtering modules for session:', sessionId);
+    
+    if (!sessionId) {
+      this.filteredModules = this.allModules;
+      this.modules = this.allModules;
+      return;
+    }
+
+    // Find the selected session
+    const selectedSession = this.sessions.find(s => s.id === sessionId);
+    if (!selectedSession || !selectedSession.moduleIds) {
+      console.log('No session found or no modules assigned to session');
+      this.filteredModules = [];
+      this.modules = [];
+      return;
+    }
+
+    console.log('Session modules:', selectedSession.moduleIds);
+    
+    // Filter modules that are assigned to this session
+    this.filteredModules = this.allModules.filter(module => 
+      selectedSession.moduleIds!.includes(module.id!)
+    );
+    
+    this.modules = this.filteredModules; // Update the modules array used in template
+    
+    console.log('Filtered modules:', this.filteredModules.map(m => m.libelleModule));
   }
 
   loadExamens(): void {
@@ -365,6 +407,9 @@ export class ExamenChronoComponent implements OnInit {
         sessionId: this.sessions.length > 0 ? this.sessions[0].id : ''
       });
       this.groupes = [];
+      // Reset filtered modules to show all modules
+      this.filteredModules = this.allModules;
+      this.modules = this.allModules;
     }
   }
 

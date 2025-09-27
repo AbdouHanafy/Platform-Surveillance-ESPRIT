@@ -1,6 +1,7 @@
 package esprit.microservicegestiondessalles.Controller;
 
 import esprit.microservicegestiondessalles.Entity.Session;
+import esprit.microservicegestiondessalles.Entity.Module;
 import esprit.microservicegestiondessalles.Service.SessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -55,5 +56,39 @@ public class SessionController {
         return ResponseEntity.ok(updated);
     }
 
+    // ✅ Assigner des modules à une session
+    @PostMapping("/{sessionId}/modules")
+    public ResponseEntity<Session> assignModulesToSession(
+            @PathVariable Long sessionId, 
+            @RequestBody List<Long> moduleIds) {
+        System.out.println("Received request to assign modules to session: " + sessionId);
+        System.out.println("Module IDs: " + moduleIds);
+        
+        Session updatedSession = sessionService.assignModulesToSession(sessionId, moduleIds);
+        
+        if (updatedSession != null) {
+            System.out.println("Successfully assigned modules to session: " + updatedSession.getId());
+            return ResponseEntity.ok(updatedSession);
+        } else {
+            System.out.println("Failed to assign modules - session not found: " + sessionId);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // ✅ Récupérer les modules d'une session
+    @GetMapping("/{sessionId}/modules")
+    public ResponseEntity<List<Long>> getSessionModules(@PathVariable Long sessionId) {
+        List<Long> moduleIds = sessionService.getSessionModules(sessionId);
+        return ResponseEntity.ok(moduleIds);
+    }
+
+    // ✅ Supprimer un module d'une session
+    @DeleteMapping("/{sessionId}/modules/{moduleId}")
+    public ResponseEntity<Void> removeModuleFromSession(
+            @PathVariable Long sessionId, 
+            @PathVariable Long moduleId) {
+        boolean success = sessionService.removeModuleFromSession(sessionId, moduleId);
+        return success ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
 
 }

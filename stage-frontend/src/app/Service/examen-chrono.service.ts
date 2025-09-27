@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { MyModule } from '../Entity/module.model';
 import { Groupe } from './emploi-du-temps.service';
 import { Enseignant } from '../Entity/Enseignant';
+import { TeacherSurveillance } from '../Entity/TeacherSurveillance';
 
 export interface ExamenChronoRequestDTO {
   sessionId: number;
@@ -75,8 +76,9 @@ export class ExamenChronoService {
   return this.http.get<Groupe[]>(`${this.Url}/groupes/all`);
   }
 
-    
- 
+  // 📊 Récupérer les heures de surveillance par enseignant
+  getTeacherSurveillanceHours(): Observable<TeacherSurveillance[]> {
+    return this.http.get<TeacherSurveillance[]>(`${this.apiUrl}/teacher-surveillance-hours`);
+  }
 
- 
 }

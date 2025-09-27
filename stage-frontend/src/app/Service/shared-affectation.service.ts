@@ -618,7 +618,7 @@ export class SharedAffectationService {
   // Manual assignment methods (for individual updates)
   assignSalleToModule(moduleId: number, salleId: number, salleNom: string, salleCapacite: number) {
     const currentAffectations = this.moduleAffectationsSubject.value;
-    const updatedAffectations = currentAffectations.map(affectation => {
+    const updatedAffectations: ModuleAffectationData[] = currentAffectations.map(affectation => {
       if (affectation.id === moduleId) {
         return {
           ...affectation,
@@ -626,8 +626,8 @@ export class SharedAffectationService {
           salleId,
           salleNom,
           salleCapacite,
-          statut: affectation.enseignantAffecte ? 'FULLY_ASSIGNED' : 'SALLE_ASSIGNED'
-        };
+          statut: affectation.enseignantAffecte ? 'FULLY_ASSIGNED' as const : 'SALLE_ASSIGNED' as const
+        } as ModuleAffectationData;
       }
       return affectation;
     });
@@ -637,7 +637,7 @@ export class SharedAffectationService {
 
   assignEnseignantToModule(moduleId: number, enseignantId: number | undefined, enseignantNom: string | undefined, enseignantGrade: string | undefined) {
     const currentAffectations = this.moduleAffectationsSubject.value;
-    const updatedAffectations = currentAffectations.map(affectation => {
+    const updatedAffectations: ModuleAffectationData[] = currentAffectations.map(affectation => {
       if (affectation.id === moduleId) {
         const isAssigning = enseignantId !== undefined && enseignantId !== 0;
         return {
@@ -647,7 +647,7 @@ export class SharedAffectationService {
           enseignantNom: isAssigning ? enseignantNom : undefined,
           enseignantGrade: isAssigning ? enseignantGrade : undefined,
           statut: this.getStatutFromAssignments(affectation.salleAffectee, isAssigning)
-        };
+        } as ModuleAffectationData;
       }
       return affectation;
     });
@@ -658,7 +658,7 @@ export class SharedAffectationService {
   // Remove salle assignment
   removeSalleFromModule(moduleId: number) {
     const currentAffectations = this.moduleAffectationsSubject.value;
-    const updatedAffectations = currentAffectations.map(affectation => {
+    const updatedAffectations: ModuleAffectationData[] = currentAffectations.map(affectation => {
       if (affectation.id === moduleId) {
         return {
           ...affectation,
@@ -667,7 +667,7 @@ export class SharedAffectationService {
           salleNom: undefined,
           salleCapacite: undefined,
           statut: this.getStatutFromAssignments(false, affectation.enseignantAffecte)
-        };
+        } as ModuleAffectationData;
       }
       return affectation;
     });
@@ -678,7 +678,7 @@ export class SharedAffectationService {
   // Remove enseignant assignment
   removeEnseignantFromModule(moduleId: number) {
     const currentAffectations = this.moduleAffectationsSubject.value;
-    const updatedAffectations = currentAffectations.map(affectation => {
+    const updatedAffectations: ModuleAffectationData[] = currentAffectations.map(affectation => {
       if (affectation.id === moduleId) {
         return {
           ...affectation,
@@ -687,7 +687,7 @@ export class SharedAffectationService {
           enseignantNom: undefined,
           enseignantGrade: undefined,
           statut: this.getStatutFromAssignments(affectation.salleAffectee, false)
-        };
+        } as ModuleAffectationData;
       }
       return affectation;
     });
@@ -698,7 +698,7 @@ export class SharedAffectationService {
   // Reset all assignments
   resetAllAssignments() {
     const currentAffectations = this.moduleAffectationsSubject.value;
-    const resetAffectations = currentAffectations.map(affectation => ({
+    const resetAffectations: ModuleAffectationData[] = currentAffectations.map(affectation => ({
       ...affectation,
       salleAffectee: false,
       salleId: undefined,
@@ -709,7 +709,7 @@ export class SharedAffectationService {
       enseignantNom: undefined,
       enseignantGrade: undefined,
       statut: 'PENDING' as const
-    }));
+    } as ModuleAffectationData));
     
     this.moduleAffectationsSubject.next(resetAffectations);
   }

@@ -18,6 +18,7 @@ $shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   border-radius: 12px;
   box-shadow: $shadow-lg;
   overflow: hidden;
+
   margin: 2rem auto;
   max-width: 1400px;
   
@@ -439,6 +440,98 @@ $shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
           }
         }
       }
+    }
+  }
+}
+
+// 📊 Styles pour les heures de surveillance dans le tableau principal
+.surveillance-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-start;
+
+  .surveillance-hours {
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    display: inline-block;
+    min-width: 3rem;
+    text-align: center;
+
+    &.status-libre {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: $white;
+    }
+
+    &.status-leger {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: $white;
+    }
+
+    &.status-normal {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: $white;
+    }
+
+    &.status-surcharge {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: $white;
+    }
+  }
+
+  .surveillance-exams {
+    font-size: 0.8rem;
+    color: $text-light;
+    font-style: italic;
+  }
+
+  .surveillance-status {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+
+    &.status-libre {
+      background: rgba(16, 185, 129, 0.1);
+      color: #059669;
+    }
+
+    &.status-leger {
+      background: rgba(245, 158, 11, 0.1);
+      color: #d97706;
+    }
+
+    &.status-normal {
+      background: rgba(59, 130, 246, 0.1);
+      color: #1d4ed8;
+    }
+
+    &.status-surcharge {
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+    }
+  }
+}
+
+// Responsive pour les heures de surveillance
+@media (max-width: 768px) {
+  .surveillance-info {
+    .surveillance-hours {
+      font-size: 1rem;
+      min-width: 2.5rem;
+    }
+
+    .surveillance-exams {
+      font-size: 0.75rem;
+    }
+
+    .surveillance-status {
+      font-size: 0.75rem;
     }
   }
 }

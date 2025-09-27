@@ -22,9 +22,55 @@
             type="text"
             name="nom"
             [(ngModel)]="sessionModel.nom_session"
-            placeholder="Ex: Session Automne 2024"
+            placeholder="Ex: S1P1, S1P2, etc."
             required
             class="session-input" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="periode">Période</label>
+            <select id="periode" name="periode" [(ngModel)]="sessionModel.periode" required class="session-input">
+              <option value="" disabled>Sélectionnez une période</option>
+              <option value="PERIODE_1">Période 1 (Semestre 1)</option>
+              <option value="PERIODE_2">Période 2 (Semestre 1)</option>
+              <option value="PERIODE_3">Période 3 (Semestre 2)</option>
+              <option value="PERIODE_4">Période 4 (Semestre 2)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="typeSession">Type de Session</label>
+            <select id="typeSession" name="typeSession" [(ngModel)]="sessionModel.typeSession" required class="session-input">
+              <option value="" disabled>Sélectionnez un type</option>
+              <option value="NORMALE">Session Normale</option>
+              <option value="RATTRAPAGE">Session de Rattrapage</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dateDebut">Date de Début</label>
+            <input
+              id="dateDebut"
+              type="date"
+              name="dateDebut"
+              [(ngModel)]="sessionModel.dateDebut"
+              required
+              class="session-input" />
+          </div>
+
+          <div class="form-group">
+            <label for="dateFin">Date de Fin</label>
+            <input
+              id="dateFin"
+              type="date"
+              name="dateFin"
+              [(ngModel)]="sessionModel.dateFin"
+              required
+              class="session-input" />
+          </div>
         </div>
 
         <div class="form-actions">
@@ -36,6 +82,135 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Module Assignment Modal -->
+  <div class="modal-overlay" *ngIf="showModuleAssignment" (click)="closeModuleAssignment()">
+    <div class="modal-content module-assignment-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📚 Assigner des Modules à {{ selectedSession?.nom_session }}</h3>
+        <button class="close-btn" (click)="closeModuleAssignment()">&times;</button>
+      </div>
+      
+      <div class="module-assignment-content">
+        <div class="modules-list">
+          <div class="modules-header">
+            <h4>Modules disponibles ({{ allModules.length }} total)</h4>
+            <div class="search-controls">
+              <div class="search-input-group">
+                <input 
+                  type="text" 
+                  [(ngModel)]="moduleSearchTerm"
+                  (input)="searchModules()"
+                  placeholder="Rechercher un module..."
+                  class="module-search-input">
+                <button 
+                  *ngIf="moduleSearchTerm"
+                  (click)="clearSearch()" 
+                  class="clear-search-btn"
+                  title="Effacer la recherche">
+                  ×
+                </button>
+              </div>
+              <button 
+                (click)="toggleShowAllModules()" 
+                class="toggle-all-btn"
+                [class.active]="showAllModules">
+                {{ showAllModules ? '📋 Afficher 10 premiers' : '📋 Voir tous les modules' }}
+              </button>
+            </div>
+          </div>
+          
+          <div class="module-checkboxes">
+            <div class="modules-count">
+              Affichage de {{ filteredModules.length }} module(s)
+            </div>
+            <label 
+              *ngFor="let module of filteredModules" 
+              class="module-checkbox-item">
+              <input 
+                type="checkbox" 
+                [checked]="isModuleSelected(module.id)"
+                (change)="toggleModuleSelection(module.id)">
+              <span class="module-info">
+                <strong>{{ module.libelleModule }}</strong>
+                <small>{{ module.codeModule }}</small>
+              </span>
+            </label>
+            
+            <div *ngIf="filteredModules.length === 0" class="no-modules-found">
+              <p>🔍 Aucun module trouvé</p>
+              <button (click)="clearSearch()" class="clear-search-btn">Effacer la recherche</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button 
+            type="button" 
+            class="btn-save" 
+            (click)="saveModuleAssignment()">
+            💾 Enregistrer les Assignations
+          </button>
+          <button 
+            type="button" 
+            class="btn-cancel" 
+            (click)="closeModuleAssignment()">
+            ❌ Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Assigned Modules Modal -->
+  <div class="modal-overlay" *ngIf="showAssignedModules" (click)="closeAssignedModulesView()">
+    <div class="modal-content assigned-modules-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>👁️ Modules Assignés à {{ selectedSession?.nom_session }}</h3>
+        <button class="close-btn" (click)="closeAssignedModulesView()">&times;</button>
+      </div>
+      
+      <div class="assigned-modules-content">
+        <div class="assigned-modules-list" *ngIf="assignedModulesToView.length > 0">
+          <div class="modules-count">
+            {{ assignedModulesToView.length }} module(s) assigné(s)
+          </div>
+          <div class="assigned-modules-grid">
+            <div 
+              *ngFor="let module of assignedModulesToView" 
+              class="assigned-module-card">
+              <div class="module-info">
+                <h4>{{ module.libelleModule }}</h4>
+                <p class="module-code">{{ module.codeModule }}</p>
+                <p class="module-unite" *ngIf="module.unitePedagogique">
+                  Unité: {{ module.unitePedagogique.libelle }}
+                </p>
+              </div>
+              <div class="module-actions">
+                <button 
+                  class="btn-remove-assigned" 
+                  (click)="removeModuleFromAssignedView(module.id)"
+                  title="Supprimer ce module de la session">
+                  🗑️ Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="no-assigned-modules" *ngIf="assignedModulesToView.length === 0">
+          <div class="empty-icon">📭</div>
+          <h3>Aucun module assigné</h3>
+          <p>Cette session n'a pas encore de modules assignés</p>
+          <button 
+            class="btn-assign-modules" 
+            (click)="closeAssignedModulesView(); openModuleAssignment(selectedSession!)">
+            📚 Assigner des modules
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -54,9 +229,32 @@
           <div class="session-details">
             <h4 class="session-name">{{ session.nom_session }}</h4>
             <p class="session-id">ID: {{ session.id }}</p>
+            <div class="session-period" *ngIf="session.dateDebut && session.dateFin">
+              <p class="period-text">
+                📅 {{ formatPeriod(session.dateDebut, session.dateFin) }}
+              </p>
+            </div>
+            <div class="session-academic-info" *ngIf="session.periode || session.typeSession">
+              <p class="academic-text" *ngIf="session.periode">
+                🎓 {{ getPeriodeDisplayName(session.periode) }}
+              </p>
+              <p class="academic-text" *ngIf="session.typeSession">
+                📝 {{ getTypeSessionDisplayName(session.typeSession) }}
+              </p>
+            </div>
           </div>
         </div>
         <div class="session-actions">
+          <button 
+            class="btn-view-assigned" 
+            (click)="viewAssignedModules(session)" 
+            title="Voir les modules assignés"
+            [disabled]="!session.moduleIds || session.moduleIds.length === 0">
+            👁️ Voir Assignés ({{ session.moduleIds?.length || 0 }})
+          </button>
+          <button class="btn-assign" (click)="openModuleAssignment(session)" title="Assigner Modules">
+            📚 Modules
+          </button>
           <button class="btn-edit" (click)="editSession(session)" title="Modifier">
             ✏️ Modifier
           </button>

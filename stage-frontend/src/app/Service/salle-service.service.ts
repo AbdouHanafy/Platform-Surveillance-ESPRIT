@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError, map, Observable, of } from 'rxjs';
 import { Salle } from '../Entity/Salle';
+import { SalleReservation } from '../Entity/SalleReservation';
 
 export interface HistoriqueReservation {
   id: number;
@@ -107,5 +108,14 @@ getSallesByIds(ids: number[]): Observable<Salle[]> {
   );
 }
 
+// 📊 Récupérer les réservations d'examens pour une salle
+getSalleExamens(salleId: number): Observable<SalleReservation[]> {
+  return this.http.get<SalleReservation[]>(`${this.baseUrl}/${salleId}/examens`).pipe(
+    catchError(err => {
+      console.error('Erreur récupération examens salle', err);
+      return of([]);
+    })
+  );
+}
 
 }

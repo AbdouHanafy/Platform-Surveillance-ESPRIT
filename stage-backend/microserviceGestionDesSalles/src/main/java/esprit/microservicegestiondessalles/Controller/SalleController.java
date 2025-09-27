@@ -1,6 +1,8 @@
 package esprit.microservicegestiondessalles.Controller;
 
 import esprit.microservicegestiondessalles.Entity.Salle;
+import esprit.microservicegestiondessalles.Entity.SalleReservationDTO;
+import esprit.microservicegestiondessalles.ExamenChronoClient;
 import esprit.microservicegestiondessalles.Repository.SalleRepository;
 import esprit.microservicegestiondessalles.Service.SalleService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,6 +29,9 @@ public class SalleController {
     @Autowired
     private SalleService salleService;
     private SalleRepository salleRepository;
+    
+    @Autowired
+    private ExamenChronoClient examenChronoClient;
 
     @GetMapping
     public List<Salle> getAll() {
@@ -104,5 +109,16 @@ public class SalleController {
                 .stream()
                 .map(Salle::getId)
                 .collect(Collectors.toList());
+    }
+
+    // 📊 Récupérer les réservations d'examens pour une salle
+    @GetMapping("/{salleId}/examens")
+    public ResponseEntity<List<SalleReservationDTO>> getSalleExamens(@PathVariable Long salleId) {
+        try {
+            List<SalleReservationDTO> reservations = examenChronoClient.getReservationsBySalleId(salleId);
+            return ResponseEntity.ok(reservations);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
